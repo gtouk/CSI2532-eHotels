@@ -22,11 +22,21 @@ Application de gestion hôtelière permettant :
 - `frontend/` : interface utilisateur
 - `meetings/` : décisions d’équipe et suivi
 
-## Stack provisoire
-- Base de données : PostgreSQL
-- Backend : Java
-- Serveur : Apache Tomcat
-- Frontend : HTML / CSS / JavaScript
+## Stack technique retenu
+
+- **Base de données** : PostgreSQL
+- **Backend** : Java
+- **Serveur d’application** : Apache Tomcat
+- **Conteneurisation** : Docker Compose
+- **Gestion de version** : GitHub
+- **Frontend** : HTML / CSS / JavaScript
+
+## Justification du choix
+Ce stack a été retenu car il est cohérent avec les technologies suggérées dans l’énoncé du projet et permet une séparation claire entre la base de données, la logique applicative et l’interface utilisateur.
+**PostgreSQL** facilite la gestion des contraintes, vues, index et triggers.
+**Java** avec **Tomcat** permet de développer une application web structurée.
+**Docker** Compose permet à tous les membres de lancer le même environnement localement.
+**HTML/CSS/JavaScript** permet de développer rapidement une interface simple et fonctionnelle.
 
 ## Règles de travail
 - Ne pas pousser directement sur `main`
