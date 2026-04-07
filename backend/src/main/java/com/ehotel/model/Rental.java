@@ -30,10 +30,10 @@ public class Rental {
     @JoinColumn(name = "employee_id", nullable = false)
     private Employee employee;
 
-    @Column(name = "check_in_date", nullable = false)
+    @Column(name = "start_date", nullable = false)
     private LocalDate checkInDate;
 
-    @Column(name = "check_out_date")
+    @Column(name = "end_date")
     private LocalDate checkOutDate;
 
     @Enumerated(EnumType.STRING)

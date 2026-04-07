@@ -1,105 +1,105 @@
 -- =====================================================
 -- 03_queries.sql
--- Requetes principales pour e-Hotels
+-- Main queries for e-Hotels
 -- =====================================================
 
 -- -----------------------------------------------------
--- Requete 1
--- Recherche de chambres disponibles avec criteres combines
--- Parametres a remplacer :
--- :date_debut, :date_fin, :capacite, :ville, :categorie, :prix_max
+-- Query 1
+-- Search available rooms with combined filters
+-- Parameters to replace:
+-- :start_date, :end_date, :capacity, :city, :category, :max_price
 -- -----------------------------------------------------
 
 SELECT
-    ch.id_chambre,
-    h.nom AS nom_hotel,
-    c.nom AS nom_chaine,
-    a.ville,
-    h.categorie,
-    ch.capacite,
-    ch.prix,
-    ch.vue,
-    ch.est_extensible
-FROM chambre ch
-JOIN hotel h ON ch.id_hotel = h.id_hotel
-JOIN chaine_hoteliere c ON h.id_chaine = c.id_chaine
-JOIN adresse a ON h.id_adresse = a.id_adresse
-WHERE ch.capacite = :capacite
-  AND a.ville = :ville
-  AND h.categorie = :categorie
-  AND ch.prix <= :prix_max
-  AND ch.id_chambre NOT IN (
-      SELECT r.id_chambre
-      FROM reservation r
-      WHERE (:date_debut < r.date_fin AND :date_fin > r.date_debut)
+    r.room_id,
+    h.name AS hotel_name,
+    hc.name AS chain_name,
+    a.city,
+    h.category,
+    r.capacity,
+    r.price,
+    r.view_type,
+    r.is_extendable
+FROM room r
+JOIN hotel h ON r.hotel_id = h.hotel_id
+JOIN hotel_chain hc ON h.chain_id = hc.chain_id
+JOIN address a ON h.address_id = a.address_id
+WHERE r.capacity = :capacity
+  AND a.city = :city
+  AND h.category = :category
+  AND r.price <= :max_price
+  AND r.room_id NOT IN (
+      SELECT res.room_id
+      FROM reservation res
+      WHERE (:start_date < res.end_date AND :end_date > res.start_date)
   )
-  AND ch.id_chambre NOT IN (
-      SELECT l.id_chambre
-      FROM location l
-      WHERE (:date_debut < l.date_fin AND :date_fin > l.date_debut)
+  AND r.room_id NOT IN (
+      SELECT ren.room_id
+      FROM rental ren
+      WHERE (:start_date < ren.end_date AND :end_date > ren.start_date)
   )
-ORDER BY ch.prix ASC;
+ORDER BY r.price ASC;
 
 -- -----------------------------------------------------
--- Requete 2
--- Afficher toutes les reservations d’un client
--- Parametre : :id_client
--- -----------------------------------------------------
-
-SELECT
-    r.id_reservation,
-    cl.prenom || ' ' || cl.nom AS client,
-    h.nom AS hotel,
-    ch.id_chambre,
-    r.date_debut,
-    r.date_fin
-FROM reservation r
-JOIN client cl ON r.id_client = cl.id_client
-JOIN chambre ch ON r.id_chambre = ch.id_chambre
-JOIN hotel h ON ch.id_hotel = h.id_hotel
-WHERE cl.id_client = :id_client
-ORDER BY r.date_debut;
-
--- -----------------------------------------------------
--- Requete 3
--- Afficher les locations gerees par un employe
--- Parametre : :id_employe
+-- Query 2
+-- Show all reservations for a customer
+-- Parameter: :customer_id
 -- -----------------------------------------------------
 
 SELECT
-    l.id_location,
-    e.prenom || ' ' || e.nom AS employe,
-    cl.prenom || ' ' || cl.nom AS client,
-    h.nom AS hotel,
-    l.id_chambre,
-    l.date_debut,
-    l.date_fin
-FROM location l
-JOIN employe e ON l.id_employe = e.id_employe
-JOIN client cl ON l.id_client = cl.id_client
-JOIN chambre ch ON l.id_chambre = ch.id_chambre
-JOIN hotel h ON ch.id_hotel = h.id_hotel
-WHERE e.id_employe = :id_employe
-ORDER BY l.date_debut;
+    res.reservation_id,
+    c.first_name || ' ' || c.last_name AS customer,
+    h.name AS hotel,
+    r.room_id,
+    res.start_date,
+    res.end_date
+FROM reservation res
+JOIN customer c ON res.customer_id = c.customer_id
+JOIN room r ON res.room_id = r.room_id
+JOIN hotel h ON r.hotel_id = h.hotel_id
+WHERE c.customer_id = :customer_id
+ORDER BY res.start_date;
 
 -- -----------------------------------------------------
--- Requete 4
--- Afficher les chambres d’un hotel avec leurs commodites
--- Parametre : :id_hotel
+-- Query 3
+-- Show rentals managed by an employee
+-- Parameter: :employee_id
 -- -----------------------------------------------------
 
 SELECT
-    ch.id_chambre,
-    h.nom AS hotel,
-    ch.capacite,
-    ch.prix,
-    ch.vue,
-    ch.etat,
-    STRING_AGG(co.nom_commodite, ', ' ORDER BY co.nom_commodite) AS commodites
-FROM chambre ch
-JOIN hotel h ON ch.id_hotel = h.id_hotel
-LEFT JOIN chambre_commodite cc ON ch.id_chambre = cc.id_chambre
-LEFT JOIN commodite co ON cc.id_commodite = co.id_commodite
-WHERE h.id_hotel = :id_hotel
-GROUP BY ch.id_chambre, h.nom, ch.capacite, ch.prix, ch.vue, ch.etat
-ORDER BY ch.id_chambre;
+    ren.rental_id,
+    e.first_name || ' ' || e.last_name AS employee,
+    c.first_name || ' ' || c.last_name AS customer,
+    h.name AS hotel,
+    ren.room_id,
+    ren.start_date,
+    ren.end_date
+FROM rental ren
+JOIN employee e ON ren.employee_id = e.employee_id
+JOIN customer c ON ren.customer_id = c.customer_id
+JOIN room r ON ren.room_id = r.room_id
+JOIN hotel h ON r.hotel_id = h.hotel_id
+WHERE e.employee_id = :employee_id
+ORDER BY ren.start_date;
+
+-- -----------------------------------------------------
+-- Query 4
+-- Show rooms in a hotel with their amenities
+-- Parameter: :hotel_id
+-- -----------------------------------------------------
+
+SELECT
+    r.room_id,
+    h.name AS hotel,
+    r.capacity,
+    r.price,
+    r.view_type,
+    r.status,
+    STRING_AGG(am.name, ', ' ORDER BY am.name) AS amenities
+FROM room r
+JOIN hotel h ON r.hotel_id = h.hotel_id
+LEFT JOIN room_amenity ra ON r.room_id = ra.room_id
+LEFT JOIN amenity am ON ra.amenity_id = am.amenity_id
+WHERE h.hotel_id = :hotel_id
+GROUP BY r.room_id, h.name, r.capacity, r.price, r.view_type, r.status
+ORDER BY r.room_id;
