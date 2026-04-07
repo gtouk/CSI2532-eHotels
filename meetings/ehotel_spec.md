@@ -462,7 +462,7 @@ flowchart LR
 - création, consultation et annulation de réservations
 - tableau de bord client
 
-#### Antoine — Backend employé / gestionnaire
+#### Gilly — Backend employé / gestionnaire
 - authentification employé
 - gestion des réservations et locations
 - gestion des clients
