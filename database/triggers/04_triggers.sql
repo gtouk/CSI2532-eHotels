@@ -15,6 +15,7 @@ BEGIN
         FROM reservation r
         WHERE r.room_id = NEW.room_id
           AND r.reservation_id <> COALESCE(NEW.reservation_id, -1)
+          AND r.status = 'RESERVED'
           AND NEW.start_date < r.end_date
           AND NEW.end_date > r.start_date
     ) THEN
@@ -25,6 +26,7 @@ BEGIN
         SELECT 1
         FROM rental rt
         WHERE rt.room_id = NEW.room_id
+          AND rt.status = 'ACTIVE'
           AND NEW.start_date < rt.end_date
           AND NEW.end_date > rt.start_date
     ) THEN
@@ -52,6 +54,7 @@ BEGIN
         FROM rental rt
         WHERE rt.room_id = NEW.room_id
           AND rt.rental_id <> COALESCE(NEW.rental_id, -1)
+          AND rt.status = 'ACTIVE'
           AND NEW.start_date < rt.end_date
           AND NEW.end_date > rt.start_date
     ) THEN
@@ -62,6 +65,7 @@ BEGIN
         SELECT 1
         FROM reservation r
         WHERE r.room_id = NEW.room_id
+          AND r.status = 'RESERVED'
           AND NEW.start_date < r.end_date
           AND NEW.end_date > r.start_date
           AND (NEW.reservation_id IS NULL OR r.reservation_id <> NEW.reservation_id)

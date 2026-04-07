@@ -22,6 +22,9 @@ public class Employee {
     @Column(name = "last_name", nullable = false, length = 100)
     private String lastName;
 
+    @Column(name = "ssn", nullable = false, length = 100)
+    private String ssn;
+
     @Column(name = "email", nullable = false, unique = true, length = 255)
     private String email;
 
@@ -31,6 +34,9 @@ public class Employee {
     @Enumerated(EnumType.STRING)
     @Column(name = "role", nullable = false, length = 30)
     private Role role;
+
+    @Column(name = "address_id", nullable = false)
+    private Long addressId;
 
     @Column(name = "password", nullable = false, length = 255)
     private String password;
@@ -73,6 +79,14 @@ public class Employee {
         this.lastName = lastName;
     }
 
+    public String getSsn() {
+        return ssn;
+    }
+
+    public void setSsn(String ssn) {
+        this.ssn = ssn;
+    }
+
     public String getEmail() {
         return email;
     }
@@ -103,6 +117,14 @@ public class Employee {
 
     public void setPassword(String password) {
         this.password = password;
+    }
+
+    public Long getAddressId() {
+        return addressId;
+    }
+
+    public void setAddressId(Long addressId) {
+        this.addressId = addressId;
     }
 
     public Boolean getActive() {
