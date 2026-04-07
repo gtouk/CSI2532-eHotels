@@ -6,7 +6,7 @@ Projet de cours pour CSI2532 : Bases de données I.
 - Gilly Dyvan Toukam Mengaptche
 - Frank Martial Penka Nghoko
 - Naomi Kesley Tekeu
-- Antoine Missoup Konga
+- Antoine Missoup
 
 ## Description
 Application de gestion hôtelière permettant :
