@@ -967,13 +967,29 @@ frontend/
 │   ├── employee-form.html
 │   └── reports.html
 ├── css/
-│   └── style.css
+│   ├── base.css
+│   ├── components.css
+│   ├── client.css
+│   ├── employee.css
+│   └── admin.css
 └── js/
     ├── main.js
     ├── client.js
     ├── employee.js
     └── admin.js
 ```
+
+### Rôle des fichiers CSS
+
+- `base.css` : contient les styles globaux communs à tout le site, comme le `body`, la typographie, les espacements, les formulaires, les boutons et les tableaux de base.
+
+- `components.css` : contient les composants réutilisables dans plusieurs pages, comme la navbar, les cards, les alertes, les badges, les sections et les blocs visuels communs.
+
+- `client.css` : contient les styles spécifiques au portail client et à ses pages.
+
+- `employee.css` : contient les styles spécifiques au portail employé et à ses pages opérationnelles.
+
+- `admin.css` : contient les styles spécifiques au portail gestionnaire / administration, notamment les pages CRUD, formulaires admin et rapports.
 
 ## 16.3 SQL et init Docker
 
