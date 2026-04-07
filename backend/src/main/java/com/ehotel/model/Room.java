@@ -3,6 +3,7 @@ package com.ehotel.model;
 import com.ehotel.enums.RoomStatus;
 import com.ehotel.enums.ViewType;
 import jakarta.persistence.*;
+
 import java.math.BigDecimal;
 
 @Entity
@@ -18,20 +19,20 @@ public class Room {
     @JoinColumn(name = "hotel_id", nullable = false)
     private Hotel hotel;
 
-    @Column(name = "room_number", nullable = false, length = 20)
+    @Column(name = "room_number", length = 20)
     private String roomNumber;
 
-    @Column(name = "capacity", nullable = false)
-    private Integer capacity;
+    @Column(name = "capacity", nullable = false, length = 50)
+    private String capacity;
 
-    @Column(name = "price_per_night", nullable = false, precision = 10, scale = 2)
+    @Column(name = "price", nullable = false, precision = 10, scale = 2)
     private BigDecimal pricePerNight;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "view_type", length = 30)
+    @Column(name = "view_type", length = 50)
     private ViewType viewType;
 
-    @Column(name = "extendable", nullable = false)
+    @Column(name = "is_extendable", nullable = false)
     private Boolean extendable = false;
 
     @Enumerated(EnumType.STRING)
@@ -65,11 +66,11 @@ public class Room {
         this.roomNumber = roomNumber;
     }
 
-    public Integer getCapacity() {
+    public String getCapacity() {
         return capacity;
     }
 
-    public void setCapacity(Integer capacity) {
+    public void setCapacity(String capacity) {
         this.capacity = capacity;
     }
 
