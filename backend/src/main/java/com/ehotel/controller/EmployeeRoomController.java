@@ -2,7 +2,7 @@ package com.ehotel.controller;
 
 import com.ehotel.dto.request.UpdateRoomStatusRequest;
 import com.ehotel.dto.response.ApiResponse;
-import com.ehotel.model.Room;
+import com.ehotel.dto.response.RoomSummaryResponse;
 import com.ehotel.service.EmployeeRoomService;
 import org.springframework.web.bind.annotation.*;
 
@@ -19,7 +19,7 @@ public class EmployeeRoomController {
     }
 
     @GetMapping
-    public ApiResponse<List<Room>> getAllRooms() {
+    public ApiResponse<List<RoomSummaryResponse>> getAllRooms() {
         return ApiResponse.success(
                 "Rooms fetched successfully",
                 employeeRoomService.getAllRooms()
@@ -27,7 +27,7 @@ public class EmployeeRoomController {
     }
 
     @PostMapping("/{roomId}/status")
-    public ApiResponse<Room> updateRoomStatus(
+    public ApiResponse<RoomSummaryResponse> updateRoomStatus(
             @PathVariable Long roomId,
             @RequestBody UpdateRoomStatusRequest request
     ) {

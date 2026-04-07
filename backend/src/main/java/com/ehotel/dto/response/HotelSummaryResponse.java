@@ -1,44 +1,17 @@
-package com.ehotel.model;
+package com.ehotel.dto.response;
 
-import jakarta.persistence.*;
+public class HotelSummaryResponse {
 
-@Entity
-@Table(name = "hotel")
-public class Hotel {
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "hotel_id")
     private Long hotelId;
-
-    @Column(name = "chain_id", nullable = false)
     private Long chainId;
-
-    @Column(name = "name", nullable = false, length = 255)
     private String name;
-
-    @Column(name = "category", nullable = false)
     private Integer category;
-
-    @Column(name = "room_count", nullable = false)
-    private Integer roomCount = 0;
-
-    @Column(name = "address_id")
-    private Long addressId;
-
-    @Transient
     private String address;
-
-    @Transient
     private String city;
-
-    @Transient
     private String country;
-
-    @Transient
     private String postalCode;
 
-    public Hotel() {
+    public HotelSummaryResponse() {
     }
 
     public Long getHotelId() {
@@ -71,22 +44,6 @@ public class Hotel {
 
     public void setCategory(Integer category) {
         this.category = category;
-    }
-
-    public Integer getRoomCount() {
-        return roomCount;
-    }
-
-    public void setRoomCount(Integer roomCount) {
-        this.roomCount = roomCount;
-    }
-
-    public Long getAddressId() {
-        return addressId;
-    }
-
-    public void setAddressId(Long addressId) {
-        this.addressId = addressId;
     }
 
     public String getAddress() {

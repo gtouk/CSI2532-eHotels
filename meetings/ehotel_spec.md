@@ -1,6 +1,6 @@
-# eHotel — Spécification complète
+# eHotel — Spécification complète mise à jour
 
-Version: 1.0  
+Version: 1.1  
 Projet: CSI 2532 — e-Hotels  
 Technologies visées: PostgreSQL, Java Spring Boot, HTML/CSS/JavaScript, Docker Compose
 
@@ -69,8 +69,7 @@ L’employé peut :
 - se connecter au portail employé
 - consulter les réservations
 - consulter le détail d’une réservation
-- effectuer un check-in
-- créer une location directe si le flux retenu l’autorise
+- créer une location à partir d’une réservation existante ou en direct selon le flux retenu
 - consulter les locations
 - effectuer un check-out
 - consulter les clients
@@ -173,6 +172,7 @@ Permet de lancer :
 - noms techniques et code : anglais recommandé
 - documentation : français accepté
 - noms JSON/API : anglais recommandé
+- schéma SQL final : anglais recommandé
 
 ## 5.2 Format des dates
 
@@ -204,15 +204,18 @@ Les entités principales sont :
 
 - `HotelChain`
 - `Hotel`
+- `Address`
 - `Room`
+- `Amenity`
 - `Customer`
 - `Employee`
-- `Booking`
+- `Reservation`
 - `Rental`
 
 Relations principales :
 
 - une chaîne possède plusieurs hôtels
+- une chaîne, un hôtel, un client et un employé sont rattachés à une adresse
 - un hôtel possède plusieurs chambres
 - un hôtel emploie plusieurs employés
 - un client peut faire plusieurs réservations
@@ -222,127 +225,138 @@ Relations principales :
 
 ---
 
-# 7. Modèle de données logique minimal
+# 7. Modèle de données logique recommandé
 
-## 7.1 hotel_chain
+## 7.1 Tables principales
 
-Champs suggérés :
+### `address`
 
-- `chain_id`
-- `name`
-- `central_office_address`
-
-## 7.2 hotel_chain_contact
-
-Permet plusieurs contacts par chaîne :
-
-- `contact_id`
-- `chain_id`
-- `contact_type` (`EMAIL`, `PHONE`)
-- `contact_value`
-
-## 7.3 hotel
-
-Champs suggérés :
-
-- `hotel_id`
-- `chain_id`
-- `name`
-- `category`
-- `street`
+- `address_id`
+- `street_number`
+- `street_name`
 - `city`
 - `province`
-- `country`
 - `postal_code`
-- `number_of_rooms`
+- `country`
 
-## 7.4 hotel_contact
+### `hotel_chain`
 
-Permet plusieurs contacts par hôtel :
+- `chain_id`
+- `name`
+- `hotel_count`
+- `address_id`
 
-- `contact_id`
+### `hotel_chain_email`
+
+- `chain_email_id`
+- `chain_id`
+- `email`
+
+### `hotel_chain_phone`
+
+- `chain_phone_id`
+- `chain_id`
+- `phone`
+
+### `hotel`
+
 - `hotel_id`
-- `contact_type` (`EMAIL`, `PHONE`)
-- `contact_value`
+- `chain_id`
+- `manager_id` nullable
+- `name`
+- `category`
+- `room_count`
+- `address_id`
 
-## 7.5 customer
+### `hotel_email`
 
-Champs suggérés :
+- `hotel_email_id`
+- `hotel_id`
+- `email`
+
+### `hotel_phone`
+
+- `hotel_phone_id`
+- `hotel_id`
+- `phone`
+
+### `customer`
 
 - `customer_id`
+- `ssn`
 - `first_name`
 - `last_name`
+- `registration_date`
+- `address_id`
 - `email`
 - `phone`
-- `password_hash` ou `password`
-- `address`
+- `address` (champ texte pratique si vous le gardez côté backend)
 - `id_type`
 - `id_number`
-- `registration_date`
-- `active`
 
-## 7.6 employee
-
-Champs suggérés :
+### `employee`
 
 - `employee_id`
 - `hotel_id`
 - `first_name`
 - `last_name`
+- `ssn`
+- `role`
+- `address_id`
 - `email`
 - `phone`
-- `password_hash` ou `password`
-- `role` (`EMPLOYE`, `GESTIONNAIRE`)
+- `password`
 - `active`
 
-## 7.7 room
-
-Champs suggérés :
+### `room`
 
 - `room_id`
 - `hotel_id`
-- `room_number`
+- `price`
 - `capacity`
-- `price_per_night`
 - `view_type`
-- `extendable`
+- `is_extendable`
 - `status`
-- `description`
+- `room_number`
 
-## 7.8 room_amenity
+### `amenity`
 
-Permet plusieurs commodités par chambre :
+- `amenity_id`
+- `name`
 
-- `room_amenity_id`
+### `room_amenity`
+
 - `room_id`
-- `amenity_name`
+- `amenity_id`
 
-## 7.9 booking
+### `reservation`
 
-Champs suggérés :
-
-- `booking_id`
+- `reservation_id`
+- `room_id`
 - `customer_id`
-- `room_id`
 - `start_date`
 - `end_date`
 - `status`
 - `total_price`
 - `created_at`
 
-## 7.10 rental
-
-Champs suggérés :
+### `rental`
 
 - `rental_id`
-- `booking_id` nullable si location directe
+- `reservation_id` nullable si location directe
 - `customer_id`
 - `room_id`
 - `employee_id`
-- `check_in_date`
-- `check_out_date`
+- `start_date`
+- `end_date`
 - `status`
-- `created_at`
+
+## 7.2 Remarques d’alignement backend
+
+- côté API Java, il est acceptable d’exposer `checkInDate` / `checkOutDate` dans les DTOs tout en mappant la table `rental` sur `start_date` / `end_date`
+- côté API Java, `pricePerNight` peut mapper la colonne SQL `price`
+- côté API Java, `extendable` peut mapper la colonne SQL `is_extendable`
+- la capacité des chambres est actuellement un **texte métier** (`single`, `double`, `triple`, `suite`, `family` ou équivalent), pas un entier
 
 ---
 
@@ -435,14 +449,9 @@ Champs suggérés :
 - `GET /hotels/{hotelId}`
 - `GET /rooms/search`
 - `GET /rooms/{roomId}`
-- `GET /client/login`
 - `POST /client/login`
-- `GET /client/register`
 - `POST /client/register`
-- `GET /employee/login`
 - `POST /employee/login`
-- `POST /employee/logout`
-- `GET /employee/me`
 
 ## 10.2 Routes client
 
@@ -458,10 +467,8 @@ Champs suggérés :
 
 ## 10.3 Routes employé
 
-- `GET /employee/dashboard`
 - `GET /employee/reservations`
 - `GET /employee/reservations/{reservationId}`
-- `POST /employee/reservations/{reservationId}/checkin`
 - `GET /employee/rentals`
 - `GET /employee/rentals/{rentalId}`
 - `POST /employee/rentals`
@@ -476,47 +483,46 @@ Champs suggérés :
 ## 10.4 Routes gestionnaire
 
 - `GET /employee/admin/hotels`
-- `GET /employee/admin/hotels/{hotelId}` recommandé
 - `POST /employee/admin/hotels`
 - `POST /employee/admin/hotels/{hotelId}/update`
 - `POST /employee/admin/hotels/{hotelId}/delete`
 - `GET /employee/admin/rooms`
-- `GET /employee/admin/rooms/{roomId}` recommandé
 - `POST /employee/admin/rooms`
 - `POST /employee/admin/rooms/{roomId}/update`
 - `POST /employee/admin/rooms/{roomId}/delete`
 - `GET /employee/admin/employees`
-- `GET /employee/admin/employees/{employeeId}` recommandé
 - `POST /employee/admin/employees`
 - `POST /employee/admin/employees/{employeeId}/update`
 - `POST /employee/admin/employees/{employeeId}/delete`
 - `GET /employee/admin/reports`
 
+## 10.5 Routes optionnelles / recommandées
+
+Ces routes peuvent être ajoutées plus tard si vous voulez une API plus riche :
+
+- `GET /employee/dashboard`
+- `GET /employee/me`
+- `POST /employee/logout`
+- `POST /employee/reservations/{reservationId}/checkin` si vous souhaitez un endpoint dédié au lieu d’utiliser `POST /employee/rentals` avec `reservationId`
+- `GET /employee/admin/hotels/{hotelId}`
+- `GET /employee/admin/rooms/{roomId}`
+- `GET /employee/admin/employees/{employeeId}`
+
 ---
 
 # 11. Sécurité et permissions
 
-## 11.1 Accès généraux
+## 11.1 Cible fonctionnelle
 
 - `/client/**` nécessite le rôle `CLIENT`
 - `/employee/**` nécessite `EMPLOYE` ou `GESTIONNAIRE`
 - `/employee/admin/**` nécessite `GESTIONNAIRE`
 
-## 11.2 Règles client
+## 11.2 État actuel du backend
 
-- un client ne peut consulter que ses propres réservations
-- un client ne peut annuler que ses propres réservations
-- un client n’accède jamais à `/employee/**`
-
-## 11.3 Règles employé
-
-- un employé standard n’accède jamais à `/employee/admin/**`
-- un employé peut effectuer les opérations hôtelières autorisées
-
-## 11.4 Règles gestionnaire
-
-- un gestionnaire peut gérer hôtels, chambres, employés et rapports
-- la suppression d’un employé est de préférence logique (`active = false`)
+- une configuration de sécurité minimale est suffisante pour le développement
+- les restrictions fines par rôle peuvent être renforcées dans une étape ultérieure
+- la suppression d’un employé doit rester logique (`active = false`)
 
 ---
 
@@ -546,9 +552,7 @@ Le module Backend Client couvre :
 
 ### Auth client
 
-- `GET /client/login`
 - `POST /client/login`
-- `GET /client/register`
 - `POST /client/register`
 - `POST /client/logout`
 
@@ -578,7 +582,7 @@ Le module Backend Client couvre :
 
 - `ApiResponse<T>`
 - `ApiError`
-- `ClientAuthData`
+- `ClientAuthResponse`
 - `ClientSummaryResponse`
 - `HotelSummaryResponse`
 - `HotelDetailsResponse`
@@ -590,54 +594,12 @@ Le module Backend Client couvre :
 
 ## 12.4 Règles métier client
 
-### Recherche
-
-- filtrage possible par ville, dates, capacité, prix, catégorie et commodités
-- seules les chambres compatibles avec l’intervalle demandé doivent être proposées
-
-### Réservation
-
 - `startDate < endDate`
 - la chambre doit être disponible sur toute la période
-- `totalPrice = nombre de nuits x pricePerNight`
+- `totalPrice = nombre de nuits x price`
 - une réservation créée reçoit le statut `RESERVED`
-
-### Annulation
-
 - seul le client propriétaire peut annuler sa réservation
-- une réservation déjà transformée en location ne peut plus être annulée comme une simple réservation
-- une réservation annulée reçoit le statut `CANCELLED`
-
-## 12.5 Responsabilités techniques
-
-Le module doit fournir :
-
-- controllers client
-- services métier client
-- repositories nécessaires
-- DTOs client
-- validations
-- gestion d’erreurs standardisée
-
-## 12.6 Structure Java recommandée
-
-Controllers :
-
-- `ClientAuthController`
-- `ClientHotelController` ou `PublicHotelController`
-- `ClientRoomController` ou `PublicRoomController`
-- `ClientReservationController`
-- `ClientProfileController`
-- `ClientDashboardController`
-
-Services :
-
-- `ClientAuthService`
-- `ClientHotelService`
-- `ClientRoomService`
-- `ClientReservationService`
-- `ClientProfileService`
-- `ClientDashboardService`
+- une réservation déjà transformée en location ne peut plus être annulée
 
 ---
 
@@ -655,7 +617,6 @@ L’employé peut :
 - se connecter
 - voir les réservations
 - voir une réservation
-- faire le check-in
 - créer une location
 - faire le check-out
 - voir les clients
@@ -683,7 +644,6 @@ Le gestionnaire a toutes les permissions employé, plus :
 
 - `GET /employee/reservations`
 - `GET /employee/reservations/{reservationId}`
-- `POST /employee/reservations/{reservationId}/checkin`
 
 ### Locations
 
@@ -729,45 +689,39 @@ Le gestionnaire a toutes les permissions employé, plus :
 
 - `GET /employee/admin/reports`
 
-## 13.5 Règles métier backend employé
-
-- un check-in n’est possible que pour une réservation en statut `RESERVED`
-- un check-in crée une location `ACTIVE`
-- un check-in met la chambre en statut `OCCUPIED`
-- un check-out n’est possible que pour une location `ACTIVE`
-- un check-out met la location en `COMPLETED`
-- un check-out remet la chambre en `AVAILABLE`
-- un employé standard ne peut pas accéder à `/employee/admin/**`
-- seul un gestionnaire peut gérer hôtels, chambres, employés et rapports
-
-## 13.6 DTOs minimaux attendus
+## 13.5 DTOs minimaux attendus
 
 ### Requests
 
 - `EmployeeLoginRequest`
 - `CreateRentalRequest`
 - `UpdateRoomStatusRequest`
-- `CreateHotelRequest`
-- `UpdateHotelRequest`
-- `CreateRoomRequest`
-- `UpdateRoomRequest`
-- `CreateEmployeeRequest`
-- `UpdateEmployeeRequest`
+- `AdminHotelRequest`
+- `AdminRoomRequest`
+- `AdminEmployeeRequest`
 
 ### Responses
 
 - `ApiResponse<T>`
-- `EmployeeAuthData`
+- `EmployeeAuthResponse`
 - `ReservationSummaryResponse`
-- `ReservationDetailsResponse`
 - `RentalSummaryResponse`
-- `RentalDetailsResponse`
 - `CustomerSummaryResponse`
 - `CustomerDetailsResponse`
 - `RoomSummaryResponse`
 - `HotelSummaryResponse`
 - `EmployeeSummaryResponse`
-- `ReportResponse`
+- `AdminReportResponse`
+
+## 13.6 Règles métier backend employé
+
+- un flux de check-in peut être implémenté par `POST /employee/rentals` avec `reservationId`
+- une location créée depuis une réservation doit utiliser les dates de la réservation
+- un check-out n’est possible que pour une location `ACTIVE`
+- un check-out met la location en `COMPLETED`
+- un check-out remet la chambre en `AVAILABLE`
+- un employé standard ne peut pas accéder à `/employee/admin/**`
+- seul un gestionnaire peut gérer hôtels, chambres, employés et rapports
 
 ## 13.7 Structure Java recommandée
 
@@ -863,126 +817,6 @@ Le frontend client doit :
 - `POST /client/reservations/{reservationId}/cancel`
 - `GET /client/me` recommandé
 
-## 14.4 Comportement attendu par page
-
-### HomePage
-
-- présenter le projet
-- rediriger vers recherche, hôtels, login client, login employé
-
-### HotelListPage
-
-- afficher la liste des hôtels
-- permettre clic vers la fiche hôtel
-
-### HotelDetailsPage
-
-- afficher nom, catégorie, adresse, contacts, commodités
-- lister les chambres ou rediriger vers la recherche
-
-### RoomSearchPage
-
-- formulaire avec ville, dates, capacité, prix, catégorie, commodité
-- affichage des résultats
-- lien vers détails chambre
-- lien vers réservation
-
-### RoomDetailsPage
-
-- afficher les détails complets de la chambre
-- afficher son hôtel
-- afficher le prix
-- proposer réserver
-
-### ClientLoginPage
-
-- formulaire email + password
-- gestion des erreurs d’authentification
-- redirection vers `/client/dashboard` après succès
-
-### ClientRegisterPage
-
-- formulaire avec `firstName`, `lastName`, `email`, `phone`, `password`, `address`
-- validation côté client
-- soumission au backend
-- redirection après succès
-
-### ClientDashboardPage
-
-- afficher les informations essentielles du client
-- afficher les réservations récentes
-- liens vers profil et réservations
-
-### ClientProfilePage
-
-- afficher les informations du compte
-- permettre modification des champs autorisés
-
-### ClientReservationListPage
-
-- afficher la liste des réservations du client connecté
-- distinguer à venir, passées, annulées si utile
-
-### ClientReservationDetailsPage
-
-- afficher détail complet de la réservation
-- afficher le statut
-- afficher `totalPrice`
-- afficher bouton annuler si applicable
-
-### NewReservationPage
-
-- préremplir `roomId` si la chambre a été choisie
-- afficher `startDate` et `endDate`
-- afficher récapitulatif et prix estimé
-- soumettre la réservation
-
-## 14.5 Validation côté client
-
-### Login
-
-- email requis
-- password requis
-
-### Register
-
-- `firstName` requis
-- `lastName` requis
-- `email` requis
-- `password` requis
-
-### Réservation
-
-- `startDate` requis
-- `endDate` requis
-- `startDate < endDate`
-
-## 14.6 Fichiers frontend attendus
-
-### HTML
-
-- `index.html`
-- `hotels.html`
-- `hotel-details.html`
-- `room-search.html`
-- `room-details.html`
-- `client-login.html`
-- `client-register.html`
-- `client/dashboard.html`
-- `client/profile.html`
-- `client/reservations.html`
-- `client/reservation-details.html`
-- `client/new-reservation.html`
-
-### JS
-
-- `js/main.js`
-- `js/client.js`
-
-### CSS
-
-- `css/style.css`
-
 ---
 
 # 15. Contrat complet — Frontend Employé / Gestionnaire
@@ -1014,36 +848,7 @@ Le frontend client doit :
 - `employee/admin/employee-form.html`
 - `employee/admin/reports.html`
 
-## 15.2 Responsabilités du frontend employé
-
-Le frontend employé doit :
-
-- afficher le formulaire de connexion employé
-- afficher le dashboard employé
-- afficher la liste des réservations
-- afficher le détail d’une réservation
-- permettre le check-in
-- afficher la liste des locations
-- afficher le détail d’une location
-- permettre le check-out
-- afficher la liste des clients
-- afficher le détail d’un client
-- afficher les chambres
-- permettre la mise à jour autorisée du statut d’une chambre
-
-## 15.3 Responsabilités du frontend gestionnaire
-
-Le frontend gestionnaire doit en plus :
-
-- afficher la liste des hôtels
-- afficher le formulaire d’ajout/modification d’hôtel
-- afficher la liste des chambres admin
-- afficher le formulaire d’ajout/modification de chambre
-- afficher la liste des employés
-- afficher le formulaire d’ajout/modification d’employé
-- afficher les rapports
-
-## 15.4 Routes backend consommées
+## 15.2 Routes backend consommées
 
 ### Auth
 
@@ -1053,10 +858,8 @@ Le frontend gestionnaire doit en plus :
 
 ### Employé
 
-- `GET /employee/dashboard`
 - `GET /employee/reservations`
 - `GET /employee/reservations/{reservationId}`
-- `POST /employee/reservations/{reservationId}/checkin`
 - `GET /employee/rentals`
 - `GET /employee/rentals/{rentalId}`
 - `POST /employee/rentals`
@@ -1082,38 +885,12 @@ Le frontend gestionnaire doit en plus :
 - `POST /employee/admin/employees/{employeeId}/delete`
 - `GET /employee/admin/reports`
 
-## 15.5 Garde d’accès UI
-
-### Non connecté
-
-- accès autorisé uniquement à `employee-login.html`
-- accès refusé aux autres pages employee
-
-### Connecté comme EMPLOYE
-
-- accès autorisé à :
-  - dashboard
-  - reservations
-  - rentals
-  - customers
-  - rooms
-- accès refusé à `employee/admin/*`
-
-### Connecté comme GESTIONNAIRE
-
-- accès autorisé à toutes les pages `employee/*`
-- accès autorisé à toutes les pages `employee/admin/*`
-
-## 15.6 Validation côté client
+## 15.3 Validation côté client
 
 ### Login
 
 - email requis
 - password requis
-
-### Check-in
-
-- n’afficher le bouton que si la réservation est compatible
 
 ### Checkout
 
@@ -1129,37 +906,9 @@ Le frontend gestionnaire doit en plus :
 - `role` limité à `EMPLOYE` ou `GESTIONNAIRE`
 - `category` numérique
 - `pricePerNight` numérique positif
-- `capacity` entier positif
-
-## 15.7 Fichiers frontend attendus
-
-### HTML
-
-- `employee-login.html`
-- `employee/dashboard.html`
-- `employee/reservations.html`
-- `employee/reservation-details.html`
-- `employee/rentals.html`
-- `employee/rental-details.html`
-- `employee/customers.html`
-- `employee/customer-details.html`
-- `employee/rooms.html`
-- `employee/admin/hotels.html`
-- `employee/admin/hotel-form.html`
-- `employee/admin/rooms.html`
-- `employee/admin/room-form.html`
-- `employee/admin/employees.html`
-- `employee/admin/employee-form.html`
-- `employee/admin/reports.html`
-
-### JS
-
-- `js/employee.js`
-- `js/admin.js`
-
-### CSS
-
-- `css/style.css`
+- `capacity` texte métier valide (`single`, `double`, `triple`, `suite`, `family` ou convention retenue)
+- création employé admin : inclure `ssn` et les champs d’adresse
+- création hôtel admin : inclure `address`, `city`, `province`, `country`, `postalCode`
 
 ---
 
@@ -1168,7 +917,7 @@ Le frontend gestionnaire doit en plus :
 ## 16.1 Backend
 
 ```text
-src/main/java/com/ehotel/
+backend/src/main/java/com/ehotel/
 ├── controller/
 ├── service/
 ├── repository/
@@ -1226,16 +975,25 @@ frontend/
     └── admin.js
 ```
 
-## 16.3 SQL
+## 16.3 SQL et init Docker
 
 ```text
-sql/
-├── 01_schema.sql
-├── 02_data.sql
-├── 03_queries.sql
-├── 04_triggers.sql
-├── 05_indexes.sql
-└── 06_views.sql
+database/
+├── schema/
+├── seeds/
+├── queries/
+├── triggers/
+├── indexes/
+├── views/
+└── init/
+    ├── 01_schema.sql
+    ├── 02_data.sql
+    ├── 04_triggers.sql
+    ├── 05_indexes.sql
+    ├── 06_views.sql
+    ├── 07_backend_alignment_patch.sql
+    ├── 08_dev_seed_employee.sql
+    └── 09_dev_seed_business_data.sql
 ```
 
 ---
@@ -1246,7 +1004,7 @@ sql/
 
 - `Dockerfile` pour le backend
 - `docker-compose.yml`
-- scripts SQL d’initialisation
+- scripts SQL d’initialisation dans `database/init/`
 - `README.md`
 
 ## 17.2 Services minimums
@@ -1254,23 +1012,29 @@ sql/
 ### PostgreSQL
 
 - base de données `ehotel`
-- chargement automatique des scripts SQL
+- chargement automatique des scripts SQL depuis `database/init/`
+- port hôte recommandé : `5433`
 
 ### Backend
 
 - application Spring Boot connectée à PostgreSQL
-- port exposé pour l’API
+- port exposé pour l’API : `8080`
 
-### Frontend
-
-- servi statiquement ou ouvert directement selon votre choix
-
-## 17.3 Objectif Docker
-
-Le projet doit pouvoir être lancé de façon reproductible avec une commande simple du type :
+## 17.3 Commandes de démarrage recommandées
 
 ```bash
-docker compose up --build
+docker compose down -v
+docker compose up -d
+cd backend
+mvn spring-boot:run
+```
+
+## 17.4 Paramètres de connexion recommandés
+
+```properties
+spring.datasource.url=${DB_URL:jdbc:postgresql://localhost:5433/ehotel}
+spring.datasource.username=${DB_USERNAME:postgres}
+spring.datasource.password=${DB_PASSWORD:postgres}
 ```
 
 ---
@@ -1291,8 +1055,7 @@ Responsable de :
 Responsable de :
 
 - auth employé
-- check-in / check-out
-- locations
+- locations et checkout
 - clients
 - gestion admin
 - rapports
@@ -1326,23 +1089,26 @@ Responsable de :
 - une chambre ne peut pas être réservée si elle n’est pas disponible sur l’intervalle demandé
 - `startDate` doit être strictement inférieure à `endDate`
 - le prix total est calculé à partir du nombre de nuits
+- les triggers doivent vérifier les chevauchements en tenant compte du statut métier
 
 ## 19.2 Annulation
 
 - seul le propriétaire de la réservation peut l’annuler côté client
 - une réservation déjà convertie en location ne peut plus être annulée comme une simple réservation
 
-## 19.3 Check-in
+## 19.3 Conversion réservation → location
 
-- possible uniquement pour une réservation `RESERVED`
-- crée une location `ACTIVE`
-- met la chambre en `OCCUPIED`
+- un flux de check-in peut être représenté par la création d’une location depuis une réservation
+- la réservation source doit être `RESERVED`
+- la réservation source doit passer à `COMPLETED`
+- la chambre doit passer à `OCCUPIED`
 
 ## 19.4 Check-out
 
 - possible uniquement pour une location `ACTIVE`
 - met la location en `COMPLETED`
 - remet la chambre en `AVAILABLE`
+- la date de fin doit respecter les contraintes SQL (`end_date > start_date`)
 
 ## 19.5 Gestion des employés
 
@@ -1361,6 +1127,7 @@ Le projet est considéré complet si :
 - les données de test se chargent
 - les requêtes fonctionnent
 - les triggers, index et vues sont présents
+- les séquences sont correctement réinitialisées après les inserts manuels si nécessaire
 
 ## 20.2 Backend
 
@@ -1369,9 +1136,10 @@ Le projet est considéré complet si :
 - recherche de chambres fonctionne
 - création réservation fonctionne
 - annulation réservation fonctionne
-- check-in fonctionne
-- check-out fonctionne
+- création location depuis réservation fonctionne
+- checkout fonctionne
 - gestion admin fonctionne selon le rôle
+- rapports fonctionnent
 
 ## 20.3 Frontend
 
@@ -1387,12 +1155,6 @@ Le projet est considéré complet si :
 - le backend accède à PostgreSQL
 - les interfaces consomment correctement l’API
 
-## 20.5 Sécurité
-
-- un client n’accède jamais aux routes employé
-- un employé standard n’accède jamais aux routes admin
-- un gestionnaire peut accéder à toutes les routes prévues pour lui
-
 ---
 
 # 21. Décision finale d’équipe
@@ -1406,5 +1168,7 @@ Le présent document sert de **référence principale** pour :
 - les formats JSON
 - les règles métier
 - la structure du projet
+- l’initialisation Docker
+- l’alignement entre schéma SQL et backend Java
 
 En cas de conflit entre modules, cette spec consolidée fait foi jusqu’à décision d’équipe contraire.

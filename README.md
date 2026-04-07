@@ -44,8 +44,38 @@ Ce stack a été retenu car il est cohérent avec les technologies suggérées d
 - Faire des pull requests
 - Nommer les commits clairement
 
-## Prochaines étapes
-1. Finaliser le stack technique
-2. Écrire le schéma SQL
-3. Ajouter les données de test
-4. Développer l’application
+---
+
+## 3. How to start the project
+
+### 3.1 Start the database
+From the project root:
+
+```bash
+docker compose down -v
+docker compose up -d
+```
+
+### 3.2 Run the backend
+From `backend/`:
+
+```bash
+mvn clean compile
+mvn spring-boot:run
+```
+
+### 3.3 Database connection used by backend
+Configured in `backend/src/main/resources/application.properties`:
+
+```properties
+spring.datasource.url=${DB_URL:jdbc:postgresql://localhost:5433/ehotel}
+spring.datasource.username=${DB_USERNAME:postgres}
+spring.datasource.password=${DB_PASSWORD:postgres}
+```
+
+### 3.4 Docker database access
+- Host: `localhost`
+- Port: `5433`
+- Database: `ehotel`
+- Username: `postgres`
+- Password: `postgres`

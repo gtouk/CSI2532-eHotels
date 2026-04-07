@@ -1,52 +1,17 @@
-package com.ehotel.model;
+package com.ehotel.dto.request;
 
-import jakarta.persistence.*;
+public class AdminHotelRequest {
 
-@Entity
-@Table(name = "hotel")
-public class Hotel {
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "hotel_id")
-    private Long hotelId;
-
-    @Column(name = "chain_id", nullable = false)
     private Long chainId;
-
-    @Column(name = "name", nullable = false, length = 255)
     private String name;
-
-    @Column(name = "category", nullable = false)
     private Integer category;
-
-    @Column(name = "room_count", nullable = false)
-    private Integer roomCount = 0;
-
-    @Column(name = "address_id")
-    private Long addressId;
-
-    @Transient
     private String address;
-
-    @Transient
     private String city;
-
-    @Transient
+    private String province;
     private String country;
-
-    @Transient
     private String postalCode;
 
-    public Hotel() {
-    }
-
-    public Long getHotelId() {
-        return hotelId;
-    }
-
-    public void setHotelId(Long hotelId) {
-        this.hotelId = hotelId;
+    public AdminHotelRequest() {
     }
 
     public Long getChainId() {
@@ -73,22 +38,6 @@ public class Hotel {
         this.category = category;
     }
 
-    public Integer getRoomCount() {
-        return roomCount;
-    }
-
-    public void setRoomCount(Integer roomCount) {
-        this.roomCount = roomCount;
-    }
-
-    public Long getAddressId() {
-        return addressId;
-    }
-
-    public void setAddressId(Long addressId) {
-        this.addressId = addressId;
-    }
-
     public String getAddress() {
         return address;
     }
@@ -103,6 +52,14 @@ public class Hotel {
 
     public void setCity(String city) {
         this.city = city;
+    }
+
+    public String getProvince() {
+        return province;
+    }
+
+    public void setProvince(String province) {
+        this.province = province;
     }
 
     public String getCountry() {

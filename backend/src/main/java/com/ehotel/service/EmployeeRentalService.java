@@ -46,6 +46,7 @@ public class EmployeeRentalService {
         this.employeeRepository = employeeRepository;
     }
 
+    @Transactional(readOnly = true)
     public List<RentalSummaryResponse> getAllRentals() {
         return rentalRepository.findAll()
                 .stream()
@@ -53,6 +54,7 @@ public class EmployeeRentalService {
                 .collect(Collectors.toList());
     }
 
+    @Transactional(readOnly = true)
     public RentalSummaryResponse getRentalById(Long rentalId) {
         Rental rental = rentalRepository.findById(rentalId)
                 .orElseThrow(() -> new ResourceNotFoundException("Rental not found"));
@@ -75,7 +77,6 @@ public class EmployeeRentalService {
         rental.setCustomer(customer);
         rental.setRoom(room);
         rental.setEmployee(employee);
-        rental.setCheckInDate(request.getCheckInDate() != null ? request.getCheckInDate() : LocalDate.now());
         rental.setStatus(RentalStatus.ACTIVE);
 
         if (request.getReservationId() != null) {
@@ -86,15 +87,33 @@ public class EmployeeRentalService {
                 throw new IllegalArgumentException("Only RESERVED reservations can be converted to rental");
             }
 
-            rental.setReservation(reservation);
+            if (!reservation.getCustomer().getCustomerId().equals(customer.getCustomerId())) {
+                throw new IllegalArgumentException("Reservation customer does not match request customer");
+            }
+
+            if (!reservation.getRoom().getRoomId().equals(room.getRoomId())) {
+                throw new IllegalArgumentException("Reservation room does not match request room");
+            }
+
+            // Important: complete reservation first to avoid DB overlap trigger conflict
             reservation.setStatus(ReservationStatus.COMPLETED);
             reservationRepository.save(reservation);
+            reservationRepository.flush();
+
+            rental.setReservation(reservation);
+            rental.setCheckInDate(reservation.getStartDate());
+            rental.setCheckOutDate(reservation.getEndDate());
+        } else {
+            LocalDate start = request.getCheckInDate() != null ? request.getCheckInDate() : LocalDate.now();
+            rental.setCheckInDate(start);
+            rental.setCheckOutDate(start.plusDays(1));
         }
+
+        Rental savedRental = rentalRepository.save(rental);
 
         room.setStatus(RoomStatus.OCCUPIED);
         roomRepository.save(room);
 
-        Rental savedRental = rentalRepository.save(rental);
         return mapToSummary(savedRental);
     }
 
@@ -107,8 +126,14 @@ public class EmployeeRentalService {
             throw new IllegalArgumentException("Only ACTIVE rentals can be checked out");
         }
 
+        LocalDate checkoutDate = LocalDate.now();
+
+        if (checkoutDate == null || !checkoutDate.isAfter(rental.getCheckInDate())) {
+            checkoutDate = rental.getCheckInDate().plusDays(1);
+        }
+
         rental.setStatus(RentalStatus.COMPLETED);
-        rental.setCheckOutDate(LocalDate.now());
+        rental.setCheckOutDate(checkoutDate);
 
         Room room = rental.getRoom();
         if (room != null) {

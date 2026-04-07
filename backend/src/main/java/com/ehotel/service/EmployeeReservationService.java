@@ -7,6 +7,7 @@ import com.ehotel.model.Reservation;
 import com.ehotel.model.Room;
 import com.ehotel.repository.ReservationRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -20,6 +21,7 @@ public class EmployeeReservationService {
         this.reservationRepository = reservationRepository;
     }
 
+    @Transactional(readOnly = true)
     public List<ReservationSummaryResponse> getAllReservations() {
         return reservationRepository.findAll()
                 .stream()
@@ -27,6 +29,7 @@ public class EmployeeReservationService {
                 .collect(Collectors.toList());
     }
 
+    @Transactional(readOnly = true)
     public ReservationSummaryResponse getReservationById(Long reservationId) {
         Reservation reservation = reservationRepository.findById(reservationId)
                 .orElseThrow(() -> new ResourceNotFoundException("Reservation not found"));
