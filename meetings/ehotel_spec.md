@@ -433,22 +433,22 @@ flowchart TD
 
 ```mermaid
 flowchart LR
-    A["Membre 1"] --> A1["Backend Client"]
+    A["Martial"] --> A1["Backend Client"]
     A1 --> A2["Auth client"]
     A1 --> A3["Recherche"]
     A1 --> A4["Reservations"]
 
-    B["Membre 2"] --> B1["Backend Employe Gestionnaire"]
+    B["Gilly"] --> B1["Backend Employe Gestionnaire"]
     B1 --> B2["Auth employe"]
     B1 --> B3["Locations"]
     B1 --> B4["Gestion admin"]
 
-    C["Membre 3"] --> C1["Frontend HTML CSS JS"]
+    C["Antoine"] --> C1["Frontend HTML CSS JS"]
     C1 --> C2["Pages publiques"]
     C1 --> C3["Pages client"]
     C1 --> C4["Pages employe admin"]
 
-    D["Membre 4"] --> D1["Integration Docker Rapport"]
+    D["Naomi"] --> D1["Integration Docker Rapport"]
     D1 --> D2["Docker Compose"]
     D1 --> D3["Tests integration"]
     D1 --> D4["README et rapport"]
@@ -456,26 +456,26 @@ flowchart LR
 
 ### Répartition détaillée
 
-#### Membre 1 — Backend client
+#### Martial — Backend client
 - authentification client
 - recherche d’hôtels et chambres
 - création, consultation et annulation de réservations
 - tableau de bord client
 
-#### Membre 2 — Backend employé / gestionnaire
+#### Antoine — Backend employé / gestionnaire
 - authentification employé
 - gestion des réservations et locations
 - gestion des clients
 - routes admin pour hôtels, chambres, employés et rapports
 
-#### Membre 3 — Frontend
+#### Antoine — Frontend
 - pages publiques
 - pages client
 - pages employé
 - pages gestionnaire
 - validation HTML/CSS/JS
 
-#### Membre 4 — Intégration / Docker / rapport
+#### Naomi — Intégration / Docker / rapport
 - `Dockerfile`
 - `docker-compose.yml`
 - initialisation PostgreSQL
