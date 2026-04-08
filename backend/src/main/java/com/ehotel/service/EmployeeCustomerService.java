@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Service
@@ -30,7 +31,7 @@ public class EmployeeCustomerService {
 
     @Transactional(readOnly = true)
     public CustomerDetailsResponse getCustomerById(Long customerId) {
-        Customer customer = customerRepository.findById(customerId)
+        Customer customer = customerRepository.findById(Objects.requireNonNull(customerId))
                 .orElseThrow(() -> new ResourceNotFoundException("Customer not found"));
 
         return mapToDetails(customer);

@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Service
@@ -42,11 +43,11 @@ public class AdminEmployeeService {
 
     @Transactional
     public EmployeeSummaryResponse createEmployee(AdminEmployeeRequest request) {
-        Hotel hotel = hotelRepository.findById(request.getHotelId())
+        Hotel hotel = hotelRepository.findById(Objects.requireNonNull(request.getHotelId()))
                 .orElseThrow(() -> new ResourceNotFoundException("Hotel not found"));
 
         Address address = buildAddressFromRequest(request);
-        Address savedAddress = addressRepository.save(address);
+        Address savedAddress = addressRepository.save(Objects.requireNonNull(address));
         Employee employee = new Employee();
         employee.setHotel(hotel);
         employee.setFirstName(request.getFirstName());
@@ -66,12 +67,12 @@ public class AdminEmployeeService {
     @Transactional
     public EmployeeSummaryResponse updateEmployee(Long employeeId, AdminEmployeeRequest request) {
         Address address = buildAddressFromRequest(request);
-        Address savedAddress = addressRepository.save(address);
+        Address savedAddress = addressRepository.save(Objects.requireNonNull(address));
 
-        Employee employee = employeeRepository.findById(employeeId)
+        Employee employee = employeeRepository.findById(Objects.requireNonNull(employeeId))
                 .orElseThrow(() -> new ResourceNotFoundException("Employee not found"));
 
-        Hotel hotel = hotelRepository.findById(request.getHotelId())
+        Hotel hotel = hotelRepository.findById(Objects.requireNonNull(request.getHotelId()))
                 .orElseThrow(() -> new ResourceNotFoundException("Hotel not found"));
 
         employee.setHotel(hotel);
@@ -95,7 +96,7 @@ public class AdminEmployeeService {
 
     @Transactional
     public void deleteEmployee(Long employeeId) {
-        Employee employee = employeeRepository.findById(employeeId)
+        Employee employee = employeeRepository.findById(Objects.requireNonNull(employeeId))
                 .orElseThrow(() -> new ResourceNotFoundException("Employee not found"));
 
         employee.setActive(false);

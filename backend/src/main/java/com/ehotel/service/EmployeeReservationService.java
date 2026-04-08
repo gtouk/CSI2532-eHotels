@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Service
@@ -31,7 +32,7 @@ public class EmployeeReservationService {
 
     @Transactional(readOnly = true)
     public ReservationSummaryResponse getReservationById(Long reservationId) {
-        Reservation reservation = reservationRepository.findById(reservationId)
+        Reservation reservation = reservationRepository.findById(Objects.requireNonNull(reservationId))
                 .orElseThrow(() -> new ResourceNotFoundException("Reservation not found"));
 
         return mapToSummary(reservation);

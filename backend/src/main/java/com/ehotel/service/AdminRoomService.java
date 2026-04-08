@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Service
@@ -34,7 +35,7 @@ public class AdminRoomService {
 
     @Transactional
     public RoomSummaryResponse createRoom(AdminRoomRequest request) {
-        Hotel hotel = hotelRepository.findById(request.getHotelId())
+        Hotel hotel = hotelRepository.findById(Objects.requireNonNull(request.getHotelId()))
                 .orElseThrow(() -> new ResourceNotFoundException("Hotel not found"));
 
         Room room = new Room();
@@ -52,10 +53,10 @@ public class AdminRoomService {
 
     @Transactional
     public RoomSummaryResponse updateRoom(Long roomId, AdminRoomRequest request) {
-        Room room = roomRepository.findById(roomId)
+        Room room = roomRepository.findById(Objects.requireNonNull(roomId))
                 .orElseThrow(() -> new ResourceNotFoundException("Room not found"));
 
-        Hotel hotel = hotelRepository.findById(request.getHotelId())
+        Hotel hotel = hotelRepository.findById(Objects.requireNonNull(request.getHotelId()))
                 .orElseThrow(() -> new ResourceNotFoundException("Hotel not found"));
 
         room.setHotel(hotel);
@@ -72,10 +73,10 @@ public class AdminRoomService {
 
     @Transactional
     public void deleteRoom(Long roomId) {
-        Room room = roomRepository.findById(roomId)
+        Room room = roomRepository.findById(Objects.requireNonNull(roomId))
                 .orElseThrow(() -> new ResourceNotFoundException("Room not found"));
 
-        roomRepository.delete(room);
+        roomRepository.delete(Objects.requireNonNull(room));
     }
 
     private RoomSummaryResponse mapToSummary(Room room) {

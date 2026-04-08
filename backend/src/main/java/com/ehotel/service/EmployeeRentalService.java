@@ -21,6 +21,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Service
@@ -56,7 +57,7 @@ public class EmployeeRentalService {
 
     @Transactional(readOnly = true)
     public RentalSummaryResponse getRentalById(Long rentalId) {
-        Rental rental = rentalRepository.findById(rentalId)
+        Rental rental = rentalRepository.findById(Objects.requireNonNull(rentalId))
                 .orElseThrow(() -> new ResourceNotFoundException("Rental not found"));
 
         return mapToSummary(rental);
@@ -64,13 +65,13 @@ public class EmployeeRentalService {
 
     @Transactional
     public RentalSummaryResponse createRental(CreateRentalRequest request) {
-        Customer customer = customerRepository.findById(request.getCustomerId())
+        Customer customer = customerRepository.findById(Objects.requireNonNull(request.getCustomerId()))
                 .orElseThrow(() -> new ResourceNotFoundException("Customer not found"));
 
-        Room room = roomRepository.findById(request.getRoomId())
+        Room room = roomRepository.findById(Objects.requireNonNull(request.getRoomId()))
                 .orElseThrow(() -> new ResourceNotFoundException("Room not found"));
 
-        Employee employee = employeeRepository.findById(request.getEmployeeId())
+        Employee employee = employeeRepository.findById(Objects.requireNonNull(request.getEmployeeId()))
                 .orElseThrow(() -> new ResourceNotFoundException("Employee not found"));
 
         Rental rental = new Rental();
@@ -80,7 +81,7 @@ public class EmployeeRentalService {
         rental.setStatus(RentalStatus.ACTIVE);
 
         if (request.getReservationId() != null) {
-            Reservation reservation = reservationRepository.findById(request.getReservationId())
+            Reservation reservation = reservationRepository.findById(Objects.requireNonNull(request.getReservationId()))
                     .orElseThrow(() -> new ResourceNotFoundException("Reservation not found"));
 
             if (reservation.getStatus() != ReservationStatus.RESERVED) {
@@ -119,7 +120,7 @@ public class EmployeeRentalService {
 
     @Transactional
     public RentalSummaryResponse checkoutRental(Long rentalId) {
-        Rental rental = rentalRepository.findById(rentalId)
+        Rental rental = rentalRepository.findById(Objects.requireNonNull(rentalId))
                 .orElseThrow(() -> new ResourceNotFoundException("Rental not found"));
 
         if (rental.getStatus() != RentalStatus.ACTIVE) {
