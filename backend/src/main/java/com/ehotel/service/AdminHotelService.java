@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Service
@@ -35,7 +36,7 @@ public class AdminHotelService {
     @Transactional
     public HotelSummaryResponse createHotel(AdminHotelRequest request) {
         Address address = buildAddressFromRequest(request);
-        Address savedAddress = addressRepository.save(address);
+        Address savedAddress = addressRepository.save(Objects.requireNonNull(address));
 
         Hotel hotel = new Hotel();
         hotel.setChainId(request.getChainId());
@@ -55,11 +56,11 @@ public class AdminHotelService {
 
     @Transactional
     public HotelSummaryResponse updateHotel(Long hotelId, AdminHotelRequest request) {
-        Hotel hotel = hotelRepository.findById(hotelId)
+        Hotel hotel = hotelRepository.findById(Objects.requireNonNull(hotelId))
                 .orElseThrow(() -> new ResourceNotFoundException("Hotel not found"));
 
         Address address = buildAddressFromRequest(request);
-        Address savedAddress = addressRepository.save(address);
+        Address savedAddress = addressRepository.save(Objects.requireNonNull(address));
 
         hotel.setChainId(request.getChainId());
         hotel.setName(request.getName());
@@ -81,10 +82,10 @@ public class AdminHotelService {
 
     @Transactional
     public void deleteHotel(Long hotelId) {
-        Hotel hotel = hotelRepository.findById(hotelId)
+        Hotel hotel = hotelRepository.findById(Objects.requireNonNull(hotelId))
                 .orElseThrow(() -> new ResourceNotFoundException("Hotel not found"));
 
-        hotelRepository.delete(hotel);
+        hotelRepository.delete(Objects.requireNonNull(hotel));
     }
 
     private Address buildAddressFromRequest(AdminHotelRequest request) {
