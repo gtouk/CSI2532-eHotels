@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inscription Client</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="form-container">
+        <h2>Créer un compte</h2>
+        <form action="/customers/register" method="post">
+            <input type="text" name="firstName" placeholder="Prénom" required>
+            <input type="text" name="lastName" placeholder="Nom" required>
+            <input type="text" name="ssn" placeholder="Numéro SSN" required>
+            <input type="email" name="email" placeholder="Email" required>
+            <input type="password" name="password" placeholder="Mot de passe" required>
+
+            <h3>Adresse</h3>
+            <input type="text" name="streetNumber" placeholder="Numéro de rue" required>
+            <input type="text" name="streetName" placeholder="Nom de rue" required>
+            <input type="text" name="city" placeholder="Ville" required>
+            <input type="text" name="province" placeholder="Province" required>
+            <input type="text" name="postalCode" placeholder="Code postal" required>
+            <input type="text" name="country" placeholder="Pays" required>
+
+            <button type="submit">S'inscrire</button>
+        </form>
+        <p>Déjà un compte ? <a href="login.html">Connectez-vous</a></p>
+    </div>
+</body>
+</html>
