@@ -21,6 +21,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Service
@@ -45,6 +46,7 @@ public class EmployeeRentalService {
         this.employeeRepository = employeeRepository;
     }
 
+    @Transactional(readOnly = true)
     public List<RentalSummaryResponse> getAllRentals() {
         return rentalRepository.findAll()
                 .stream()
@@ -52,8 +54,9 @@ public class EmployeeRentalService {
                 .collect(Collectors.toList());
     }
 
+    @Transactional(readOnly = true)
     public RentalSummaryResponse getRentalById(Long rentalId) {
-        Rental rental = rentalRepository.findById(rentalId)
+        Rental rental = rentalRepository.findById(Objects.requireNonNull(rentalId))
                 .orElseThrow(() -> new ResourceNotFoundException("Rental not found"));
 
         return mapToSummary(rental);
@@ -61,53 +64,76 @@ public class EmployeeRentalService {
 
     @Transactional
     public RentalSummaryResponse createRental(CreateRentalRequest request) {
-        Customer customer = customerRepository.findById(request.getCustomerId())
+        Customer customer = customerRepository.findById(Objects.requireNonNull(request.getCustomerId()))
                 .orElseThrow(() -> new ResourceNotFoundException("Customer not found"));
 
-        Room room = roomRepository.findById(request.getRoomId())
+        Room room = roomRepository.findById(Objects.requireNonNull(request.getRoomId()))
                 .orElseThrow(() -> new ResourceNotFoundException("Room not found"));
 
-        Employee employee = employeeRepository.findById(request.getEmployeeId())
+        Employee employee = employeeRepository.findById(Objects.requireNonNull(request.getEmployeeId()))
                 .orElseThrow(() -> new ResourceNotFoundException("Employee not found"));
 
         Rental rental = new Rental();
         rental.setCustomer(customer);
         rental.setRoom(room);
         rental.setEmployee(employee);
-        rental.setCheckInDate(request.getCheckInDate() != null ? request.getCheckInDate() : LocalDate.now());
         rental.setStatus(RentalStatus.ACTIVE);
 
         if (request.getReservationId() != null) {
-            Reservation reservation = reservationRepository.findById(request.getReservationId())
+            Reservation reservation = reservationRepository.findById(Objects.requireNonNull(request.getReservationId()))
                     .orElseThrow(() -> new ResourceNotFoundException("Reservation not found"));
 
             if (reservation.getStatus() != ReservationStatus.RESERVED) {
                 throw new IllegalArgumentException("Only RESERVED reservations can be converted to rental");
             }
 
-            rental.setReservation(reservation);
+            if (!reservation.getCustomer().getCustomerId().equals(customer.getCustomerId())) {
+                throw new IllegalArgumentException("Reservation customer does not match request customer");
+            }
+
+            if (!reservation.getRoom().getRoomId().equals(room.getRoomId())) {
+                throw new IllegalArgumentException("Reservation room does not match request room");
+            }
+
+            // Important: complete reservation first to avoid DB overlap trigger conflict
             reservation.setStatus(ReservationStatus.COMPLETED);
             reservationRepository.save(reservation);
+            reservationRepository.flush();
+
+            rental.setReservation(reservation);
+            rental.setCheckInDate(reservation.getStartDate());
+            rental.setCheckOutDate(reservation.getEndDate());
+        } else {
+            LocalDate start = request.getCheckInDate() != null ? request.getCheckInDate() : LocalDate.now();
+            rental.setCheckInDate(start);
+            rental.setCheckOutDate(start.plusDays(1));
         }
+
+        Rental savedRental = rentalRepository.save(rental);
 
         room.setStatus(RoomStatus.OCCUPIED);
         roomRepository.save(room);
 
-        Rental savedRental = rentalRepository.save(rental);
         return mapToSummary(savedRental);
     }
 
     @Transactional
     public RentalSummaryResponse checkoutRental(Long rentalId) {
-        Rental rental = rentalRepository.findById(rentalId)
+        Rental rental = rentalRepository.findById(Objects.requireNonNull(rentalId))
                 .orElseThrow(() -> new ResourceNotFoundException("Rental not found"));
 
         if (rental.getStatus() != RentalStatus.ACTIVE) {
             throw new IllegalArgumentException("Only ACTIVE rentals can be checked out");
         }
 
+        LocalDate checkoutDate = LocalDate.now();
+
+        if (checkoutDate == null || !checkoutDate.isAfter(rental.getCheckInDate())) {
+            checkoutDate = rental.getCheckInDate().plusDays(1);
+        }
+
         rental.setStatus(RentalStatus.COMPLETED);
-        rental.setCheckOutDate(LocalDate.now());
+        rental.setCheckOutDate(checkoutDate);
 
         Room room = rental.getRoom();
         if (room != null) {

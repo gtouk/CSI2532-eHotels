@@ -14,7 +14,11 @@ public class Address {
     @Column(name = "street_number", nullable = false)
     private Integer streetNumber;
 
+<<<<<<< HEAD
     @Column(name = "street_name", nullable = false, length = 150)
+=======
+    @Column(name = "street_name", nullable = false, length = 255)
+>>>>>>> origin/main
     private String streetName;
 
     @Column(name = "city", nullable = false, length = 100)
@@ -32,12 +36,22 @@ public class Address {
     public Address() {
     }
 
+<<<<<<< HEAD
     // Getters & Setters
 
+=======
+>>>>>>> origin/main
     public Long getAddressId() {
         return addressId;
     }
 
+<<<<<<< HEAD
+=======
+    public void setAddressId(Long addressId) {
+        this.addressId = addressId;
+    }
+
+>>>>>>> origin/main
     public Integer getStreetNumber() {
         return streetNumber;
     }
@@ -46,10 +60,13 @@ public class Address {
         this.streetNumber = streetNumber;
     }
 
+<<<<<<< HEAD
     public void setAddressId(Long addressId) {
         this.addressId = addressId;
     }
 
+=======
+>>>>>>> origin/main
     public String getStreetName() {
         return streetName;
     }
