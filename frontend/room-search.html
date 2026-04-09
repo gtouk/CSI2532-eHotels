@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Recherche de chambres — e-Hotels</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body data-page="room-search">
+
+  <div id="navbar"></div>
+
+  <main>
+    <div class="container">
+      <h1>Rechercher une chambre</h1>
+      <p style="color:#64748b;margin-bottom:16px">Utilisez les filtres ci-dessous pour trouver la chambre idéale.</p>
+
+      <div class="filter-box">
+        <form id="search-form">
+          <div class="filter-grid">
+            <div>
+              <label for="filter-city">Ville</label>
+              <input type="text" id="filter-city" name="city" placeholder="Ex : Ottawa">
+            </div>
+            <div>
+              <label for="filter-startDate">Arrivée</label>
+              <input type="date" id="filter-startDate" name="startDate">
+            </div>
+            <div>
+              <label for="filter-endDate">Départ</label>
+              <input type="date" id="filter-endDate" name="endDate">
+            </div>
+            <div>
+              <label for="filter-capacity">Capacité</label>
+              <select id="filter-capacity" name="capacity">
+                <option value="">Toutes</option>
+                <option value="single">Simple</option>
+                <option value="double">Double</option>
+                <option value="triple">Triple</option>
+                <option value="suite">Suite</option>
+                <option value="family">Familiale</option>
+              </select>
+            </div>
+            <div>
+              <label for="filter-minPrice">Prix min ($)</label>
+              <input type="number" id="filter-minPrice" name="minPrice" placeholder="0" min="0">
+            </div>
+            <div>
+              <label for="filter-maxPrice">Prix max ($)</label>
+              <input type="number" id="filter-maxPrice" name="maxPrice" placeholder="1000" min="0">
+            </div>
+            <div>
+              <label for="filter-category">Catégorie</label>
+              <select id="filter-category" name="category">
+                <option value="">Toutes</option>
+                <option value="1">1 étoile</option>
+                <option value="2">2 étoiles</option>
+                <option value="3">3 étoiles</option>
+                <option value="4">4 étoiles</option>
+                <option value="5">5 étoiles</option>
+              </select>
+            </div>
+            <div>
+              <label for="filter-hotelId">Hôtel (ID)</label>
+              <input type="number" id="filter-hotelId" name="hotelId" placeholder="Optionnel" min="1">
+            </div>
+          </div>
+          <div class="filter-actions">
+            <button type="submit" class="btn btn-primary">Rechercher</button>
+            <button type="reset" class="btn btn-outline">Réinitialiser</button>
+          </div>
+        </form>
+      </div>
+
+      <div id="search-results">
+        <p style="text-align:center;color:#94a3b8;padding:30px">
+          Remplissez les filtres et cliquez sur « Rechercher ».
+        </p>
+      </div>
+    </div>
+  </main>
+
+  <footer>
+    <p>e-Hotels — Projet CSI2532 — Université d'Ottawa</p>
+  </footer>
+
+  <script src="js/main.js"></script>
+  <script src="js/client.js"></script>
+</body>
+</html>

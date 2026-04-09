@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Connexion — e-Hotels</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body data-page="client-login">
+
+  <div id="navbar"></div>
+
+  <main>
+    <div class="auth-box">
+      <h1>Connexion</h1>
+      <span class="subtitle">Accédez à votre espace client</span>
+
+      <div id="alert-box"></div>
+
+      <form id="login-form">
+        <label for="email">Adresse email</label>
+        <input type="email" id="email" name="email" placeholder="votre@email.com" required>
+
+        <label for="password">Mot de passe</label>
+        <input type="password" id="password" name="password" placeholder="Votre mot de passe" required>
+
+        <button type="submit" class="btn btn-primary" style="width:100%">Se connecter</button>
+      </form>
+
+      <div class="auth-footer">
+        Pas encore de compte ? <a href="client-register.html">Inscrivez-vous</a>
+      </div>
+    </div>
+  </main>
+
+  <footer>
+    <p>e-Hotels — Projet CSI2532 — Université d'Ottawa</p>
+  </footer>
+
+  <script src="js/main.js"></script>
+  <script src="js/client.js"></script>
+</body>
+</html>

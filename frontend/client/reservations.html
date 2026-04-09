@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mes réservations — e-Hotels</title>
+  <link rel="stylesheet" href="../css/style.css">
+</head>
+<body data-page="client-reservations">
+
+  <div id="navbar"></div>
+
+  <main>
+    <div class="container">
+      <div class="client-layout">
+        <aside class="sidebar">
+          <h4>Mon espace</h4>
+          <ul>
+            <li><a href="dashboard.html">Tableau de bord</a></li>
+            <li><a href="reservations.html" class="active">Mes réservations</a></li>
+            <li><a href="profile.html">Mon profil</a></li>
+            <li><a href="../room-search.html">Rechercher</a></li>
+          </ul>
+        </aside>
+        <section style="min-width:0">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:10px">
+            <div>
+              <h1>Mes réservations</h1>
+              <p style="color:#64748b;margin:0">Vos réservations passées et à venir.</p>
+            </div>
+            <a href="new-reservation.html" class="btn btn-primary">Nouvelle réservation</a>
+          </div>
+          <div id="reservations-content">
+            <div class="loading"><div class="spinner"></div><p>Chargement…</p></div>
+          </div>
+        </section>
+      </div>
+    </div>
+  </main>
+
+  <footer>
+    <p>e-Hotels — Projet CSI2532 — Université d'Ottawa</p>
+  </footer>
+
+  <script src="../js/main.js"></script>
+  <script src="../js/client.js"></script>
+</body>
+</html>
