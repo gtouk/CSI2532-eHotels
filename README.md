@@ -225,6 +225,12 @@ Cela :
 - construit le backend
 - lance PostgreSQL et Spring Boot
 
+Si vous souhaitez que "rebuild" automatiquement le docker apres chaque modification sauvegardee:
+
+```bash
+docker compose watch
+```
+
 ### Option de développement : base en Docker, backend avec Maven
 Depuis la racine du projet :
 
