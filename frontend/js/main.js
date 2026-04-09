@@ -75,9 +75,74 @@ function requireAuth() {
 
 /* ---------- Path prefix ---------- */
 
-/** Pages inside /client/ need "../" to reach root-level assets and pages. */
+/**
+ * Relative path from the current HTML file to the frontend root
+ * (where index.html, css/, js/ live).
+ */
 function getPrefix() {
-  return window.location.pathname.includes("/client/") ? "../" : "";
+  const path = window.location.pathname;
+  if (path.includes("/employee/admin/")) return "../../";
+  if (path.includes("/employee/")) return "../";
+  if (path.includes("/client/")) return "../";
+  return "";
+}
+
+/** Alias for employee portal pages (same as getPrefix). */
+function getEmployeeAssetPrefix() {
+  return getPrefix();
+}
+
+/* ---------- Employee session (localStorage) ---------- */
+
+const EMPLOYEE_SESSION_KEY = "ehotel_employee";
+
+function getEmployee() {
+  try {
+    return JSON.parse(localStorage.getItem(EMPLOYEE_SESSION_KEY));
+  } catch {
+    return null;
+  }
+}
+
+function saveEmployee(data) {
+  localStorage.setItem(EMPLOYEE_SESSION_KEY, JSON.stringify(data));
+}
+
+function clearEmployeeSession() {
+  localStorage.removeItem(EMPLOYEE_SESSION_KEY);
+}
+
+function isEmployeeLoggedIn() {
+  return getEmployee() !== null;
+}
+
+function isManager() {
+  const e = getEmployee();
+  return e && e.role === "GESTIONNAIRE";
+}
+
+/**
+ * Redirects to employee login if not authenticated as employee.
+ * @returns {boolean}
+ */
+function requireEmployeeAuth() {
+  if (!isEmployeeLoggedIn()) {
+    window.location.href = getPrefix() + "employee-login.html";
+    return false;
+  }
+  return true;
+}
+
+/**
+ * Redirects non-managers away from admin pages.
+ * @returns {boolean}
+ */
+function requireManager() {
+  if (!isManager()) {
+    window.location.href = getPrefix() + "employee/dashboard.html";
+    return false;
+  }
+  return true;
 }
 
 /* ---------- Navbar ---------- */
@@ -102,6 +167,17 @@ function renderNavbar() {
       `<a href="${p}client-register.html" class="btn btn-sm btn-primary">Inscription</a>`;
   }
 
+  const emp = getEmployee();
+  let empNav = "";
+  if (emp) {
+    empNav =
+      `<a href="${p}employee/dashboard.html">Portail employé</a>` +
+      `<span style="color:#999;font-size:0.85rem;padding:0 8px">${esc(emp.firstName || "Employé")}</span>` +
+      `<a href="#" id="btn-employee-logout" class="btn btn-sm btn-outline">Déconnexion employé</a>`;
+  } else {
+    empNav = `<a href="${p}employee-login.html">Employés</a>`;
+  }
+
   el.innerHTML =
     `<nav><div class="container" style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px">` +
     `<a href="${p}index.html" class="logo">e-Hotels</a>` +
@@ -109,6 +185,7 @@ function renderNavbar() {
     `<a href="${p}index.html">Accueil</a>` +
     `<a href="${p}hotels.html">Hôtels</a>` +
     `<a href="${p}room-search.html">Recherche</a>` +
+    empNav +
     right +
     `</div></div></nav>`;
 
@@ -118,6 +195,15 @@ function renderNavbar() {
       e.preventDefault();
       apiFetch("POST", "/client/logout").catch(function () {});
       clearSession();
+      window.location.href = p + "index.html";
+    });
+  }
+
+  const empLogout = document.getElementById("btn-employee-logout");
+  if (empLogout) {
+    empLogout.addEventListener("click", function (e) {
+      e.preventDefault();
+      clearEmployeeSession();
       window.location.href = p + "index.html";
     });
   }
