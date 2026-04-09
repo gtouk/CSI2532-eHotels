@@ -11,4 +11,5 @@ public interface RentalRepository extends JpaRepository<Rental, Long> {
     List<Rental> findByCustomer_CustomerId(Long customerId);
     List<Rental> findByRoom_RoomId(Long roomId);
     long countByStatus(RentalStatus status);
+    boolean existsByReservation_ReservationId(Long reservationId);
 }

@@ -34,6 +34,7 @@ public class Customer {
     @ManyToOne
     @JoinColumn(name = "address_id", nullable = false)
     private Address address;
+    @Transient
     private String role = "CLIENT";
 
     public Customer() {
