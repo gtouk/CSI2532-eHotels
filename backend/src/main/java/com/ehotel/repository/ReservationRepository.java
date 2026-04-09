@@ -17,4 +17,6 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
             List<ReservationStatus> statuses,
             LocalDate start,
             LocalDate end);
+
+    List<Reservation> findByCustomerCustomerId(Long customerId);
 }

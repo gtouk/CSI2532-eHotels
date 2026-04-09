@@ -3,6 +3,7 @@ package com.ehotel.service;
 import com.ehotel.dto.response.CustomerDetailsResponse;
 import com.ehotel.dto.response.CustomerSummaryResponse;
 import com.ehotel.exception.ResourceNotFoundException;
+import com.ehotel.model.Address;
 import com.ehotel.model.Customer;
 import com.ehotel.repository.CustomerRepository;
 import org.springframework.stereotype.Service;
@@ -43,21 +44,52 @@ public class EmployeeCustomerService {
         response.setFirstName(customer.getFirstName());
         response.setLastName(customer.getLastName());
         response.setEmail(customer.getEmail());
-        response.setPhone(customer.getPhone());
         return response;
     }
 
     private CustomerDetailsResponse mapToDetails(Customer customer) {
         CustomerDetailsResponse response = new CustomerDetailsResponse();
         response.setCustomerId(customer.getCustomerId());
+        response.setSsn(customer.getSsn());
         response.setFirstName(customer.getFirstName());
         response.setLastName(customer.getLastName());
         response.setEmail(customer.getEmail());
-        response.setPhone(customer.getPhone());
-        response.setAddress(customer.getAddress());
-        response.setIdType(customer.getIdType());
-        response.setIdNumber(customer.getIdNumber());
         response.setRegistrationDate(customer.getRegistrationDate());
+        response.setRole(customer.getRole());
+        response.setAddress(formatAddress(customer.getAddress()));
         return response;
+    }
+
+    private String formatAddress(Address address) {
+        if (address == null) {
+            return null;
+        }
+
+        StringBuilder sb = new StringBuilder();
+
+        if (address.getStreetNumber() != null) {
+            sb.append(address.getStreetNumber()).append(" ");
+        }
+        if (address.getStreetName() != null) {
+            sb.append(address.getStreetName());
+        }
+        if (address.getCity() != null && !address.getCity().isBlank()) {
+            if (sb.length() > 0) sb.append(", ");
+            sb.append(address.getCity());
+        }
+        if (address.getProvince() != null && !address.getProvince().isBlank()) {
+            if (sb.length() > 0) sb.append(", ");
+            sb.append(address.getProvince());
+        }
+        if (address.getPostalCode() != null && !address.getPostalCode().isBlank()) {
+            if (sb.length() > 0) sb.append(", ");
+            sb.append(address.getPostalCode());
+        }
+        if (address.getCountry() != null && !address.getCountry().isBlank()) {
+            if (sb.length() > 0) sb.append(", ");
+            sb.append(address.getCountry());
+        }
+
+        return sb.toString();
     }
 }

@@ -5,14 +5,13 @@ import java.time.LocalDate;
 public class CustomerDetailsResponse {
 
     private Long customerId;
+    private String ssn;
     private String firstName;
     private String lastName;
     private String email;
-    private String phone;
     private String address;
-    private String idType;
-    private String idNumber;
     private LocalDate registrationDate;
+    private String role;
 
     public CustomerDetailsResponse() {
     }
@@ -23,6 +22,14 @@ public class CustomerDetailsResponse {
 
     public void setCustomerId(Long customerId) {
         this.customerId = customerId;
+    }
+
+    public String getSsn() {
+        return ssn;
+    }
+
+    public void setSsn(String ssn) {
+        this.ssn = ssn;
     }
 
     public String getFirstName() {
@@ -49,14 +56,6 @@ public class CustomerDetailsResponse {
         this.email = email;
     }
 
-    public String getPhone() {
-        return phone;
-    }
-
-    public void setPhone(String phone) {
-        this.phone = phone;
-    }
-
     public String getAddress() {
         return address;
     }
@@ -65,27 +64,19 @@ public class CustomerDetailsResponse {
         this.address = address;
     }
 
-    public String getIdType() {
-        return idType;
-    }
-
-    public void setIdType(String idType) {
-        this.idType = idType;
-    }
-
-    public String getIdNumber() {
-        return idNumber;
-    }
-
-    public void setIdNumber(String idNumber) {
-        this.idNumber = idNumber;
-    }
-
     public LocalDate getRegistrationDate() {
         return registrationDate;
     }
 
     public void setRegistrationDate(LocalDate registrationDate) {
         this.registrationDate = registrationDate;
+    }
+
+    public String getRole() {
+        return role;
+    }
+
+    public void setRole(String role) {
+        this.role = role;
     }
 }

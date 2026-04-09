@@ -25,7 +25,7 @@ public class ClientAuthService {
 
     private BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
 
-    // 🔐 LOGIN
+    // LOGIN
     public CustomerAuthData login(ClientLoginRequest request) {
         Customer customer = customerRepository.findByEmail(request.getEmail())
                 .orElseThrow(() -> new RuntimeException("Email not found"));
@@ -44,12 +44,12 @@ public class ClientAuthService {
 
     public CustomerAuthData register(ClientRegisterRequest request) {
 
-        // 🔹 1. Vérifier email unique
+        // 1. Vérifier email unique
         if (customerRepository.findByEmail(request.getEmail()).isPresent()) {
             throw new RuntimeException("Email already exists");
         }
 
-        // 🔹 2. Créer l'adresse
+        // 2. Créer l'adresse
         Address address = new Address();
         address.setStreetNumber(request.getStreetNumber());
         address.setStreetName(request.getStreetName());
@@ -60,10 +60,10 @@ public class ClientAuthService {
 
         address = addressRepository.save(address);
 
-        // 🔹 3. Hasher le mot de passe
+        // 3. Hasher le mot de passe
         String hash = encoder.encode(request.getPassword());
 
-        // 🔹 4. Créer le customer
+        // 4. Créer le customer
         Customer customer = new Customer();
         customer.setFirstName(request.getFirstName());
         customer.setLastName(request.getLastName());
@@ -75,7 +75,7 @@ public class ClientAuthService {
 
         customer = customerRepository.save(customer); // pas besoin de cast
 
-        // 🔹 5. Préparer la réponse
+        // 5. Préparer la réponse
         CustomerAuthData data = new CustomerAuthData();
         data.setClientId(customer.getCustomerId());
         data.setEmail(customer.getEmail());
