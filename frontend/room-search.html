@@ -15,15 +15,12 @@
   <main>
     <div class="container">
       <h1>Rechercher une chambre</h1>
-      <p style="color:#64748b;margin-bottom:16px">Utilisez les filtres ci-dessous pour trouver la chambre idéale.</p>
+      <p style="color:#777;margin-bottom:16px">Utilisez les filtres ci-dessous pour trouver la chambre idéale.</p>
 
       <div class="filter-box">
         <form id="search-form">
-          <div class="filter-grid">
-            <div>
-              <label for="filter-city">Ville</label>
-              <input type="text" id="filter-city" name="city" placeholder="Ex : Ottawa">
-            </div>
+          <!-- Ligne 1 : Arrivée, Départ, Capacité, Chaîne -->
+          <div class="filter-row filter-row-4">
             <div>
               <label for="filter-startDate">Arrivée</label>
               <input type="date" id="filter-startDate" name="startDate">
@@ -44,13 +41,15 @@
               </select>
             </div>
             <div>
-              <label for="filter-minPrice">Prix min ($)</label>
-              <input type="number" id="filter-minPrice" name="minPrice" placeholder="0" min="0">
+              <label for="filter-chain">Chaîne</label>
+              <select id="filter-chain" name="chainId">
+                <option value="">Toutes</option>
+              </select>
             </div>
-            <div>
-              <label for="filter-maxPrice">Prix max ($)</label>
-              <input type="number" id="filter-maxPrice" name="maxPrice" placeholder="1000" min="0">
-            </div>
+          </div>
+
+          <!-- Ligne 2 : Catégorie, Ville, Prix max, Bouton -->
+          <div class="filter-row filter-row-4b">
             <div>
               <label for="filter-category">Catégorie</label>
               <select id="filter-category" name="category">
@@ -63,19 +62,23 @@
               </select>
             </div>
             <div>
-              <label for="filter-hotelId">Hôtel (ID)</label>
-              <input type="number" id="filter-hotelId" name="hotelId" placeholder="Optionnel" min="1">
+              <label for="filter-city">Ville</label>
+              <input type="text" id="filter-city" name="city" placeholder="Ex : Ottawa">
             </div>
-          </div>
-          <div class="filter-actions">
-            <button type="submit" class="btn btn-primary">Rechercher</button>
-            <button type="reset" class="btn btn-outline">Réinitialiser</button>
+            <div>
+              <label for="filter-maxPrice">Prix max ($)</label>
+              <input type="number" id="filter-maxPrice" name="maxPrice" placeholder="1000" min="0">
+            </div>
+            <div>
+              <label>&nbsp;</label>
+              <button type="submit" class="btn btn-primary btn-block">🔍 Rechercher</button>
+            </div>
           </div>
         </form>
       </div>
 
       <div id="search-results">
-        <p style="text-align:center;color:#94a3b8;padding:30px">
+        <p style="text-align:center;color:#999;padding:30px">
           Remplissez les filtres et cliquez sur « Rechercher ».
         </p>
       </div>

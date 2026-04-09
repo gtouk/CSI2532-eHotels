@@ -94,7 +94,7 @@ function renderNavbar() {
     right =
       `<a href="${p}client/dashboard.html">Mon espace</a>` +
       `<a href="${p}client/reservations.html">Réservations</a>` +
-      `<span style="color:#94a3b8;font-size:0.85rem;padding:0 8px">${esc(client.firstName || "Client")}</span>` +
+      `<span style="color:#999;font-size:0.85rem;padding:0 8px">${esc(client.firstName || "Client")}</span>` +
       `<a href="#" id="btn-logout" class="btn btn-sm btn-outline">Déconnexion</a>`;
   } else {
     right =
