@@ -125,7 +125,7 @@ async function initRoomSearch() {
     showLoading("search-results");
 
     const params = new URLSearchParams();
-    const filterNames = ["city", "startDate", "endDate", "capacity", "maxPrice", "category", "chainId"];
+    const filterNames = ["startDate", "endDate", "capacity", "maxPrice", "category", "chainId", "minSurface", "minRoomCount"];
     for (const name of filterNames) {
       const input = form.elements[name];
       if (input && input.value) params.set(name, input.value);

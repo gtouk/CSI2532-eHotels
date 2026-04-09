@@ -303,6 +303,48 @@ nav .container {
   grid-template-columns: 1fr 1fr 1fr auto;
 }
 
+.filter-row-5 {
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+}
+
+.search-filters .filter-field {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.search-filters .filter-field label {
+  min-height: 1.35em;
+  line-height: 1.2;
+}
+
+.search-filters .filter-field-label-spacer {
+  visibility: hidden;
+}
+
+.search-filters .filter-field input,
+.search-filters .filter-field select {
+  width: 100%;
+  min-height: 42px;
+  margin-bottom: 0;
+}
+
+.search-filters .filter-field--empty .filter-field-placeholder {
+  min-height: 42px;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  box-sizing: border-box;
+}
+
+.search-filters .filter-field--action .btn {
+  width: 100%;
+  min-height: 42px;
+  margin-bottom: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
 .filter-row input,
 .filter-row select {
   margin-bottom: 0;
@@ -370,12 +412,14 @@ nav .container {
   .hero h1 { font-size: 1.7rem; }
   .card-grid { grid-template-columns: 1fr; }
   .filter-row-4, .filter-row-4b { grid-template-columns: 1fr 1fr; }
+  .filter-row-5 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .filter-grid { grid-template-columns: 1fr 1fr; }
   .detail-grid { grid-template-columns: 1fr 1fr; }
 }
 
 @media (max-width: 480px) {
   .filter-row-4, .filter-row-4b { grid-template-columns: 1fr; }
+  .filter-row-5 { grid-template-columns: 1fr; }
   .filter-grid { grid-template-columns: 1fr; }
   .detail-grid { grid-template-columns: 1fr; }
 }
