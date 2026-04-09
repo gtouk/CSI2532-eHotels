@@ -289,10 +289,7 @@ Relations principales :
 - `registration_date`
 - `address_id`
 - `email`
-- `phone`
 - `address` (champ texte pratique si vous le gardez côté backend)
-- `id_type`
-- `id_number`
 
 ### `employee`
 
