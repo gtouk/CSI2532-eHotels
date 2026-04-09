@@ -32,12 +32,10 @@ public class Address {
     public Address() {
     }
 
+    // Getters & Setters
+
     public Long getAddressId() {
         return addressId;
-    }
-
-    public void setAddressId(Long addressId) {
-        this.addressId = addressId;
     }
 
     public Integer getStreetNumber() {
@@ -46,6 +44,10 @@ public class Address {
 
     public void setStreetNumber(Integer streetNumber) {
         this.streetNumber = streetNumber;
+    }
+
+    public void setAddressId(Long addressId) {
+        this.addressId = addressId;
     }
 
     public String getStreetName() {

@@ -38,8 +38,7 @@ public class EmployeeRentalService {
             ReservationRepository reservationRepository,
             CustomerRepository customerRepository,
             RoomRepository roomRepository,
-            EmployeeRepository employeeRepository
-    ) {
+            EmployeeRepository employeeRepository) {
         this.rentalRepository = rentalRepository;
         this.reservationRepository = reservationRepository;
         this.customerRepository = customerRepository;

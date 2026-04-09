@@ -12,35 +12,61 @@ public class Customer {
     @Column(name = "customer_id")
     private Long customerId;
 
+    @Column(name = "ssn", nullable = false, unique = true, length = 20)
+    private String ssn;
+
     @Column(name = "first_name", nullable = false, length = 100)
     private String firstName;
 
     @Column(name = "last_name", nullable = false, length = 100)
     private String lastName;
 
-    @Column(name = "email", nullable = false, unique = true, length = 255)
+    @Column(name = "registration_date", nullable = false)
+    private LocalDate registrationDate;
+
+    @Column(name = "email", unique = true)
     private String email;
 
-    @Column(name = "phone", length = 30)
-    private String phone;
+    @Column(name = "password_hash", nullable = false)
+    private String passwordHash;
 
-    @Column(name = "address", length = 500)
-    private String address;
-
-    @Column(name = "id_type", length = 50)
-    private String idType;
-
-    @Column(name = "id_number", length = 100)
-    private String idNumber;
-
-    @Column(name = "registration_date")
-    private LocalDate registrationDate;
+    // 🔗 Relation avec Address
+    @ManyToOne
+    @JoinColumn(name = "address_id", nullable = false)
+    private Address address;
+    private String role = "CLIENT";
 
     public Customer() {
     }
 
+    // Getters & Setters
+
     public Long getCustomerId() {
         return customerId;
+    }
+
+    public String getPasswordHash() {
+        return passwordHash;
+    }
+
+    public Address getAddress() {
+        return address;
+    }
+
+    public String getSsn() {
+        return ssn;
+    }
+
+    public void setSsn(String ssn) {
+        this.ssn = ssn;
+    }
+
+    public void setPasswordHash(String password) {
+        this.passwordHash = password;
+    }
+
+    public void setAddress(Address address) {
+        this.address = address;
     }
 
     public void setCustomerId(Long customerId) {
@@ -67,47 +93,19 @@ public class Customer {
         return email;
     }
 
-    public void setEmail(String email) {
-        this.email = email;
-    }
-
-    public String getPhone() {
-        return phone;
-    }
-
-    public void setPhone(String phone) {
-        this.phone = phone;
-    }
-
-    public String getAddress() {
-        return address;
-    }
-
-    public void setAddress(String address) {
-        this.address = address;
-    }
-
-    public String getIdType() {
-        return idType;
-    }
-
-    public void setIdType(String idType) {
-        this.idType = idType;
-    }
-
-    public String getIdNumber() {
-        return idNumber;
-    }
-
-    public void setIdNumber(String idNumber) {
-        this.idNumber = idNumber;
-    }
-
     public LocalDate getRegistrationDate() {
         return registrationDate;
     }
 
+    public String getRole() {
+        return role;
+    }
+
     public void setRegistrationDate(LocalDate registrationDate) {
         this.registrationDate = registrationDate;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
     }
 }

@@ -1,10 +1,14 @@
 package com.ehotel.repository;
 
 import com.ehotel.model.Room;
+import com.ehotel.enums.RoomStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
 
 import java.util.List;
 
+@Repository
 public interface RoomRepository extends JpaRepository<Room, Long> {
-    List<Room> findByHotel_HotelId(Long hotelId);
+
+    List<Room> findByHotel_HotelIdAndStatus(Long hotelId, RoomStatus status);
 }

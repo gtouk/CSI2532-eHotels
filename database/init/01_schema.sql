@@ -118,6 +118,8 @@ CREATE TABLE customer (
     last_name VARCHAR(100) NOT NULL,
     registration_date DATE NOT NULL,
     address_id INTEGER NOT NULL,
+    email TEXT UNIQUE,
+    password_hash TEXT NOT NULL,
     CONSTRAINT fk_customer_address
         FOREIGN KEY (address_id) REFERENCES address(address_id)
 );
