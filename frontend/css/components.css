@@ -1,0 +1,425 @@
+/* ==========================================================================
+   components.css — Navbar, cards, badges, alerts, hero, features, filtres
+   Palette : noir #1a1a1a / blanc #fff / or #c5a55a
+   ========================================================================== */
+
+/* --- Navbar --- */
+
+nav {
+  background: #fff;
+  border-bottom: 1px solid #e5e5e5;
+  padding: 10px 0;
+  position: sticky;
+  top: 0;
+  z-index: 50;
+}
+
+nav .container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.logo {
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: #1a1a1a;
+  text-decoration: none;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+}
+
+.nav-links {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex-wrap: wrap;
+}
+
+.nav-links a {
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #555;
+  transition: background 0.15s, color 0.15s;
+}
+
+.nav-links a:hover {
+  background: #f2f2f2;
+  color: #1a1a1a;
+  text-decoration: none;
+}
+
+/* --- Cards --- */
+
+.card {
+  background: #fff;
+  border: 1px solid #e5e5e5;
+  border-radius: 10px;
+  padding: 20px;
+  margin-bottom: 14px;
+  transition: box-shadow 0.15s;
+}
+
+.card:hover {
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.06);
+}
+
+.card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(310px, 1fr));
+  gap: 16px;
+}
+
+/* --- Room card (rich style) --- */
+
+.room-card {
+  background: #fff;
+  border: 1px solid #e5e5e5;
+  border-radius: 10px;
+  padding: 22px;
+  display: flex;
+  flex-direction: column;
+  transition: box-shadow 0.15s;
+}
+
+.room-card:hover {
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.06);
+}
+
+.room-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 6px;
+}
+
+.room-card-header .chain {
+  font-size: 0.75rem;
+  color: #999;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.room-card-header .hotel-name {
+  font-weight: 700;
+  font-size: 1rem;
+  color: #1a1a1a;
+}
+
+.room-card-header .room-price {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: #1a1a1a;
+  white-space: nowrap;
+}
+
+.room-card-header .room-price small {
+  font-size: 0.75rem;
+  font-weight: 400;
+  color: #999;
+}
+
+.room-card .stars {
+  margin-bottom: 10px;
+}
+
+.room-card-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 10px;
+}
+
+.room-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 10px;
+  background: #f2f2f2;
+  border-radius: 100px;
+  font-size: 0.75rem;
+  color: #555;
+}
+
+.room-tag-extra {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.room-card-amenities {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 14px;
+}
+
+.amenity-tag {
+  padding: 2px 8px;
+  background: #f7f7f7;
+  border: 1px solid #e5e5e5;
+  border-radius: 4px;
+  font-size: 0.7rem;
+  color: #777;
+}
+
+.room-card .btn-block {
+  margin-top: auto;
+}
+
+/* --- Badges --- */
+
+.badge {
+  display: inline-block;
+  padding: 2px 10px;
+  border-radius: 100px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.badge-reserved    { background: #f0f0f0; color: #555; }
+.badge-cancelled   { background: #fee2e2; color: #991b1b; }
+.badge-completed   { background: #d1fae5; color: #065f46; }
+.badge-available   { background: #d1fae5; color: #065f46; }
+.badge-occupied    { background: #fef3c7; color: #92400e; }
+.badge-active      { background: #e8e8e8; color: #333; }
+.badge-maintenance { background: #f5f5f5; color: #777; }
+
+/* --- Alerts --- */
+
+.alert {
+  padding: 12px 16px;
+  border-radius: 6px;
+  margin-bottom: 16px;
+  font-size: 0.9rem;
+}
+
+.alert-success { background: #d1fae5; color: #065f46; }
+.alert-danger  { background: #fee2e2; color: #991b1b; }
+.alert-info    { background: #f0f0f0; color: #333; }
+
+/* --- Hero --- */
+
+.hero {
+  background: #1a1a1a;
+  color: #fff;
+  padding: 64px 0;
+  text-align: center;
+  margin-top: -28px;
+  margin-bottom: 28px;
+}
+
+.hero h1 {
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 2.4rem;
+  color: #fff;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin-bottom: 10px;
+}
+
+.hero .subtitle {
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.25em;
+  color: #c5a55a;
+  margin-bottom: 28px;
+}
+
+.hero p {
+  font-size: 1rem;
+  opacity: 0.85;
+  max-width: 540px;
+  margin: 0 auto 24px;
+}
+
+.hero-buttons {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+/* --- Features --- */
+
+.features {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 18px;
+  margin: 28px 0;
+}
+
+.feature-card {
+  background: #fff;
+  border: 1px solid #e5e5e5;
+  border-radius: 10px;
+  padding: 28px 20px;
+  text-align: center;
+  transition: box-shadow 0.15s, transform 0.15s;
+}
+
+.feature-card:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+  transform: translateY(-2px);
+}
+
+.feature-card .icon {
+  font-size: 2.4rem;
+  margin-bottom: 10px;
+}
+
+.feature-card p {
+  color: #777;
+  font-size: 0.9rem;
+}
+
+/* --- Filter panel --- */
+
+.filter-box {
+  background: #fff;
+  border: 1px solid #e5e5e5;
+  border-radius: 10px;
+  padding: 22px;
+  margin-bottom: 22px;
+}
+
+.filter-row {
+  display: grid;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.filter-row-4 {
+  grid-template-columns: repeat(4, 1fr);
+}
+
+.filter-row-4b {
+  grid-template-columns: 1fr 1fr 1fr auto;
+}
+
+.filter-row-5 {
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+}
+
+.search-filters .filter-field {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.search-filters .filter-field label {
+  min-height: 1.35em;
+  line-height: 1.2;
+}
+
+.search-filters .filter-field-label-spacer {
+  visibility: hidden;
+}
+
+.search-filters .filter-field input,
+.search-filters .filter-field select {
+  width: 100%;
+  min-height: 42px;
+  margin-bottom: 0;
+}
+
+.search-filters .filter-field--empty .filter-field-placeholder {
+  min-height: 42px;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  box-sizing: border-box;
+}
+
+.search-filters .filter-field--action .btn {
+  width: 100%;
+  min-height: 42px;
+  margin-bottom: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.filter-row input,
+.filter-row select {
+  margin-bottom: 0;
+}
+
+.filter-row .btn {
+  align-self: end;
+  white-space: nowrap;
+}
+
+/* Legacy grid kept for other pages */
+.filter-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 12px;
+}
+
+.filter-grid input,
+.filter-grid select {
+  margin-bottom: 0;
+}
+
+.filter-actions {
+  margin-top: 16px;
+  display: flex;
+  gap: 10px;
+}
+
+/* --- Detail grid --- */
+
+.detail-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+  gap: 14px;
+  margin: 16px 0;
+}
+
+.detail-grid .item label {
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: #999;
+  margin-bottom: 2px;
+}
+
+.detail-grid .item span {
+  display: block;
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: #1a1a1a;
+}
+
+/* --- Misc (étoiles, prix, breadcrumb) --- */
+
+.stars       { color: #c5a55a; letter-spacing: 1px; }
+.price       { font-size: 1.15rem; font-weight: 700; color: #1a1a1a; }
+.breadcrumb  { font-size: 0.85rem; color: #999; margin-bottom: 12px; }
+.breadcrumb a { color: #999; }
+.breadcrumb a:hover { color: #1a1a1a; }
+
+/* --- Responsive (components) --- */
+
+@media (max-width: 768px) {
+  .hero { padding: 40px 0; }
+  .hero h1 { font-size: 1.7rem; }
+  .card-grid { grid-template-columns: 1fr; }
+  .filter-row-4, .filter-row-4b { grid-template-columns: 1fr 1fr; }
+  .filter-row-5 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .filter-grid { grid-template-columns: 1fr 1fr; }
+  .detail-grid { grid-template-columns: 1fr 1fr; }
+}
+
+@media (max-width: 480px) {
+  .filter-row-4, .filter-row-4b { grid-template-columns: 1fr; }
+  .filter-row-5 { grid-template-columns: 1fr; }
+  .filter-grid { grid-template-columns: 1fr; }
+  .detail-grid { grid-template-columns: 1fr; }
+}

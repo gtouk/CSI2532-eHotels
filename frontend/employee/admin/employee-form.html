@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin — Employé — e-Hotels</title>
+  <link rel="stylesheet" href="../../css/base.css">
+  <link rel="stylesheet" href="../../css/components.css">
+  <link rel="stylesheet" href="../../css/client.css">
+  <link rel="stylesheet" href="../../css/employee.css">
+</head>
+<body data-page="employee-admin-employee-form">
+
+  <div id="navbar"></div>
+
+  <main>
+    <div class="container">
+      <div class="employee-layout">
+        <aside class="sidebar">
+          <h4>Portail employé</h4>
+          <ul>
+            <li><a href="../dashboard.html">Tableau de bord</a></li>
+            <li><a href="../reservations.html">Réservations</a></li>
+            <li><a href="../rentals.html">Locations</a></li>
+            <li><a href="../customers.html">Clients</a></li>
+            <li><a href="../rooms.html">Chambres</a></li>
+          </ul>
+          <div class="admin-block">
+            <h4>Administration</h4>
+            <ul>
+              <li><a href="hotels.html">Hôtels</a></li>
+              <li><a href="rooms.html">Chambres (admin)</a></li>
+              <li><a href="employees.html" class="active">Employés</a></li>
+              <li><a href="reports.html">Rapports</a></li>
+            </ul>
+          </div>
+        </aside>
+        <section>
+          <div class="breadcrumb"><a href="employees.html">Employés</a> / Formulaire</div>
+          <h1 id="form-title">Nouvel employé</h1>
+          <p style="color:#777;font-size:0.9rem">Adresse complète et NIR requis (format adresse : « 123 Rue Principale »).</p>
+
+          <div class="card" style="margin-top:16px">
+            <div id="alert-box"></div>
+            <form id="employee-form" style="margin-top:12px">
+              <label for="hotelId">Hôtel</label>
+              <select id="hotelId" name="hotelId" required></select>
+
+              <div class="form-row">
+                <div>
+                  <label for="firstName">Prénom</label>
+                  <input type="text" id="firstName" name="firstName" required>
+                </div>
+                <div>
+                  <label for="lastName">Nom</label>
+                  <input type="text" id="lastName" name="lastName" required>
+                </div>
+              </div>
+
+              <label for="email">Email</label>
+              <input type="email" id="email" name="email" required>
+
+              <label for="phone">Téléphone</label>
+              <input type="tel" id="phone" name="phone">
+
+              <label for="password">Mot de passe</label>
+              <input type="password" id="password" name="password">
+              <p id="password-hint" style="font-size:0.8rem;color:#999;margin-top:-12px;margin-bottom:12px">Requis à la création.</p>
+
+              <label for="role">Rôle</label>
+              <select id="role" name="role" required>
+                <option value="EMPLOYE">EMPLOYE</option>
+                <option value="GESTIONNAIRE">GESTIONNAIRE</option>
+              </select>
+
+              <label for="ssn">NIR / identifiant (SSN)</label>
+              <input type="text" id="ssn" name="ssn" required>
+
+              <label for="address">Adresse (no et rue)</label>
+              <input type="text" id="address" name="address" required placeholder="ex. 123 Rue Main">
+
+              <div class="form-row">
+                <div>
+                  <label for="city">Ville</label>
+                  <input type="text" id="city" name="city" value="Ottawa">
+                </div>
+                <div>
+                  <label for="province">Province</label>
+                  <input type="text" id="province" name="province" value="Ontario">
+                </div>
+              </div>
+
+              <div class="form-row">
+                <div>
+                  <label for="country">Pays</label>
+                  <input type="text" id="country" name="country" value="Canada">
+                </div>
+                <div>
+                  <label for="postalCode">Code postal</label>
+                  <input type="text" id="postalCode" name="postalCode" value="K1A0A6">
+                </div>
+              </div>
+
+              <label style="display:flex;align-items:center;gap:8px">
+                <input type="checkbox" id="active" name="active" checked> Compte actif
+              </label>
+
+              <button type="submit" class="btn btn-primary">Enregistrer</button>
+              <a href="employees.html" class="btn btn-outline" style="margin-left:8px">Annuler</a>
+            </form>
+          </div>
+        </section>
+      </div>
+    </div>
+  </main>
+
+  <footer>
+    <p>e-Hotels — Projet CSI2532 — Université d'Ottawa</p>
+  </footer>
+
+  <script src="../../js/main.js"></script>
+  <script src="../../js/employee.js"></script>
+</body>
+</html>
