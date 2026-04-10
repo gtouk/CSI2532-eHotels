@@ -227,7 +227,10 @@ function initLogin() {
    ==================================================================== */
 
 function initRegister() {
-  if (isLoggedIn()) { window.location.href = "client/dashboard.html"; return; }
+  if (isLoggedIn()) {
+    window.location.href = "client/dashboard.html";
+    return;
+  }
 
   const form = document.getElementById("register-form");
   form.addEventListener("submit", async function (e) {
@@ -236,15 +239,33 @@ function initRegister() {
 
     const fields = {
       firstName: form.firstName.value.trim(),
-      lastName:  form.lastName.value.trim(),
-      email:     form.email.value.trim(),
-      phone:     form.phone.value.trim(),
-      password:  form.password.value,
-      address:   form.address.value.trim(),
+      lastName: form.lastName.value.trim(),
+      email: form.email.value.trim(),
+      phone: form.phone.value.trim(),
+      ssn: form.ssn.value.trim(),
+      password: form.password.value,
+      streetNumber: form.streetNumber.value.trim(),
+      streetName: form.streetName.value.trim(),
+      city: form.city.value.trim(),
+      province: form.province.value.trim(),
+      postalCode: form.postalCode.value.trim(),
+      country: form.country.value.trim(),
     };
 
-    if (!fields.firstName || !fields.lastName || !fields.email || !fields.password) {
-      showAlert("danger", "Prénom, nom, email et mot de passe sont requis.");
+    if (
+      !fields.firstName ||
+      !fields.lastName ||
+      !fields.email ||
+      !fields.password ||
+      !fields.ssn ||
+      !fields.streetNumber ||
+      !fields.streetName ||
+      !fields.city ||
+      !fields.province ||
+      !fields.postalCode ||
+      !fields.country
+    ) {
+      showAlert("danger", "Tous les champs requis doivent être remplis.");
       return;
     }
 
@@ -256,7 +277,9 @@ function initRegister() {
 
     if (res.success) {
       showAlert("success", "Inscription réussie ! Redirection…");
-      setTimeout(function () { window.location.href = "client-login.html"; }, 1500);
+      setTimeout(function () {
+        window.location.href = "client-login.html";
+      }, 1500);
     } else {
       let msg = res.message || "Erreur lors de l'inscription.";
       if (res.errors && res.errors.length > 0) {
@@ -334,7 +357,14 @@ async function initProfile() {
         `</div>` +
         `<label>Email</label><input type="email" value="${esc(prof.email || "")}" disabled>` +
         `<label>Téléphone</label><input type="tel" name="phone" value="${esc(prof.phone || "")}">` +
-        `<label>Adresse</label><input type="text" name="address" value="${esc(prof.address || "")}">` +
+        // `<label>Adresse</label><input type="text" name="address" value="${esc(prof.address || "")}">` +
+        `<h3>Adresse</h3>` +
+        `<input type="text" name="streetNumber" placeholder="Numéro de rue" value="${esc(prof.streetNumber || "")}">` +
+        `<input type="text" name="streetName" placeholder="Nom de rue" value="${esc(prof.streetName || "")}">` +
+        `<input type="text" name="city" placeholder="Ville" value="${esc(prof.city || "")}">` +
+        `<input type="text" name="province" placeholder="Province" value="${esc(prof.province || "")}">` +
+        `<input type="text" name="postalCode" placeholder="Code postal" value="${esc(prof.postalCode || "")}">` +
+        `<input type="text" name="country" placeholder="Pays" value="${esc(prof.country || "")}">` +
         `<button type="submit" class="btn btn-primary">Enregistrer</button>` +
       `</form>` +
     `</div>`;
@@ -346,12 +376,17 @@ async function initProfile() {
     const btn = form.querySelector("button[type=submit]");
     btn.disabled = true;
 
-    const data = {
-      firstName: form.firstName.value.trim(),
-      lastName:  form.lastName.value.trim(),
-      phone:     form.phone.value.trim(),
-      address:   form.address.value.trim(),
-    };
+  const data = {
+    firstName: form.firstName.value.trim(),
+    lastName: form.lastName.value.trim(),
+    phone: form.phone.value.trim(),
+    streetNumber: form.streetNumber.value.trim(),
+    streetName: form.streetName.value.trim(),
+    city: form.city.value.trim(),
+    province: form.province.value.trim(),
+    postalCode: form.postalCode.value.trim(),
+    country: form.country.value.trim(),
+  };
 
     const upd = await apiFetch("POST", "/client/profile/update", data);
 

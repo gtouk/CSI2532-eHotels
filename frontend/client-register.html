@@ -37,11 +37,31 @@
         <label for="phone">Téléphone</label>
         <input type="tel" id="phone" name="phone" placeholder="613-555-0000">
 
+        <label for="ssn">NAS / SSN</label>
+        <input type="text" id="ssn" name="ssn" placeholder="123-456-789" required>
+
         <label for="password">Mot de passe</label>
         <input type="password" id="password" name="password" placeholder="Minimum 6 caractères" required minlength="6">
 
-        <label for="address">Adresse</label>
-        <input type="text" id="address" name="address" placeholder="123 rue Principale, Ottawa, ON">
+        <h3>Adresse</h3>
+
+        <label for="streetNumber">Numéro de rue</label>
+        <input type="text" id="streetNumber" name="streetNumber" placeholder="123" required>
+
+        <label for="streetName">Nom de rue</label>
+        <input type="text" id="streetName" name="streetName" placeholder="Rue Principale" required>
+
+        <label for="city">Ville</label>
+        <input type="text" id="city" name="city" placeholder="Ottawa" required>
+
+        <label for="province">Province</label>
+        <input type="text" id="province" name="province" placeholder="Ontario" required>
+
+        <label for="postalCode">Code postal</label>
+        <input type="text" id="postalCode" name="postalCode" placeholder="K1A 0A6" required>
+
+        <label for="country">Pays</label>
+        <input type="text" id="country" name="country" placeholder="Canada" required>
 
         <button type="submit" class="btn btn-primary" style="width:100%">S'inscrire</button>
       </form>
