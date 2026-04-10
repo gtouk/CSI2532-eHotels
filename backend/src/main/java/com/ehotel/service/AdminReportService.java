@@ -1,15 +1,16 @@
 package com.ehotel.service;
 
 import com.ehotel.dto.response.AdminReportResponse;
-import com.ehotel.enums.RentalStatus;
+import com.ehotel.model.Rental;
 import com.ehotel.repository.CustomerRepository;
 import com.ehotel.repository.EmployeeRepository;
 import com.ehotel.repository.HotelRepository;
-import com.ehotel.repository.RentalRepository;
 import com.ehotel.repository.ReservationRepository;
+import com.ehotel.repository.RentalRepository;
 import com.ehotel.repository.RoomRepository;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
 
 @Service
 public class AdminReportService {
@@ -37,16 +38,28 @@ public class AdminReportService {
         this.rentalRepository = rentalRepository;
     }
 
-    @Transactional(readOnly = true)
     public AdminReportResponse getReports() {
         AdminReportResponse response = new AdminReportResponse();
+
         response.setTotalHotels(hotelRepository.count());
         response.setTotalRooms(roomRepository.count());
         response.setTotalCustomers(customerRepository.count());
         response.setTotalEmployees(employeeRepository.count());
         response.setTotalReservations(reservationRepository.count());
-        response.setActiveRentals(rentalRepository.countByStatus(RentalStatus.ACTIVE));
-        response.setCompletedRentals(rentalRepository.countByStatus(RentalStatus.COMPLETED));
+
+        List<Rental> rentals = rentalRepository.findAll();
+
+        long activeRentals = rentals.stream()
+                .filter(r -> r.getCheckOutDate() == null)
+                .count();
+
+        long completedRentals = rentals.stream()
+                .filter(r -> r.getCheckOutDate() != null)
+                .count();
+
+        response.setActiveRentals(activeRentals);
+        response.setCompletedRentals(completedRentals);
+
         return response;
     }
 }

@@ -4,6 +4,8 @@ import com.ehotel.enums.RoomStatus;
 import com.ehotel.enums.ViewType;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.List;
 
 public class AdminRoomRequest {
 
@@ -14,6 +16,8 @@ public class AdminRoomRequest {
     private ViewType viewType;
     private Boolean extendable;
     private RoomStatus status;
+    private List<String> amenities = new ArrayList<>();
+
 
     public AdminRoomRequest() {
     }
@@ -72,5 +76,13 @@ public class AdminRoomRequest {
 
     public void setStatus(RoomStatus status) {
         this.status = status;
+    }
+
+    public List<String> getAmenities() {
+        return amenities;
+    }
+
+    public void setAmenities(List<String> amenities) {
+        this.amenities = amenities;
     }
 }

@@ -7,37 +7,46 @@ import com.ehotel.dto.response.RoomSummaryResponse;
 import com.ehotel.enums.RentalStatus;
 import com.ehotel.enums.ReservationStatus;
 import com.ehotel.enums.RoomStatus;
+import com.ehotel.model.Address;
+import com.ehotel.model.Amenity;
 import com.ehotel.model.Hotel;
 import com.ehotel.model.Rental;
 import com.ehotel.model.Room;
+import com.ehotel.repository.AddressRepository;
 import com.ehotel.repository.HotelRepository;
-import com.ehotel.repository.ReservationRepository;
 import com.ehotel.repository.RentalRepository;
+import com.ehotel.repository.ReservationRepository;
 import com.ehotel.repository.RoomRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
+@Transactional(readOnly = true)
 public class PublicService {
 
     private final HotelRepository hotelRepository;
     private final RoomRepository roomRepository;
     private final ReservationRepository reservationRepository;
     private final RentalRepository rentalRepository;
+    private final AddressRepository addressRepository;
 
     public PublicService(
             HotelRepository hotelRepository,
             RoomRepository roomRepository,
             ReservationRepository reservationRepository,
-            RentalRepository rentalRepository
+            RentalRepository rentalRepository,
+            AddressRepository addressRepository
     ) {
         this.hotelRepository = hotelRepository;
         this.roomRepository = roomRepository;
         this.reservationRepository = reservationRepository;
         this.rentalRepository = rentalRepository;
+        this.addressRepository = addressRepository;
     }
 
     public String getHomeMessage() {
@@ -139,10 +148,20 @@ public class PublicService {
         response.setChainId(hotel.getChainId());
         response.setName(hotel.getName());
         response.setCategory(hotel.getCategory());
-        response.setAddress(hotel.getAddress());
-        response.setCity(hotel.getCity());
-        response.setCountry(hotel.getCountry());
-        response.setPostalCode(hotel.getPostalCode());
+
+        Address address = hotel.getAddressId() != null
+                ? addressRepository.findById(hotel.getAddressId()).orElse(null)
+                : null;
+
+        if (address != null) {
+            String fullAddress = buildAddressLine(address);
+            response.setAddress(fullAddress);
+            response.setCity(address.getCity());
+            response.setProvince(address.getProvince());
+            response.setCountry(address.getCountry());
+            response.setPostalCode(address.getPostalCode());
+        }
+
         return response;
     }
 
@@ -154,23 +173,48 @@ public class PublicService {
         response.setCategory(hotel.getCategory());
         response.setRoomCount(hotel.getRoomCount());
         response.setAddressId(hotel.getAddressId());
-        response.setAddress(hotel.getAddress());
-        response.setCity(hotel.getCity());
-        response.setCountry(hotel.getCountry());
-        response.setPostalCode(hotel.getPostalCode());
+
+        Address address = hotel.getAddressId() != null
+                ? addressRepository.findById(hotel.getAddressId()).orElse(null)
+                : null;
+
+        if (address != null) {
+            String fullAddress = buildAddressLine(address);
+            response.setAddress(fullAddress);
+            response.setCity(address.getCity());
+            response.setProvince(address.getProvince());
+            response.setCountry(address.getCountry());
+            response.setPostalCode(address.getPostalCode());
+        }
+
         return response;
+    }
+
+    private String buildAddressLine(Address address) {
+        String number = address.getStreetNumber() != null
+                ? String.valueOf(address.getStreetNumber())
+                : "";
+        String street = address.getStreetName() != null
+                ? address.getStreetName()
+                : "";
+        String full = (number + " " + street).trim();
+        return full.isEmpty() ? null : full;
     }
 
     private RoomDetailsResponse mapRoomToDetails(Room room) {
         RoomDetailsResponse response = new RoomDetailsResponse();
         response.setRoomId(room.getRoomId());
         response.setHotelId(room.getHotel() != null ? room.getHotel().getHotelId() : null);
+        response.setHotelName(room.getHotel() != null ? room.getHotel().getName() : null);
+        response.setChainName(null);
+        response.setCategory(room.getHotel() != null ? room.getHotel().getCategory() : null);
         response.setRoomNumber(room.getRoomNumber());
         response.setCapacity(room.getCapacity());
         response.setPricePerNight(room.getPricePerNight());
         response.setViewType(room.getViewType() != null ? room.getViewType().name() : null);
         response.setExtendable(room.getExtendable());
         response.setStatus(room.getStatus() != null ? room.getStatus().name() : null);
+        response.setAmenities(extractAmenityNames(room));
         return response;
     }
 
@@ -178,12 +222,29 @@ public class PublicService {
         RoomSummaryResponse response = new RoomSummaryResponse();
         response.setRoomId(room.getRoomId());
         response.setHotelId(room.getHotel() != null ? room.getHotel().getHotelId() : null);
+        response.setHotelName(room.getHotel() != null ? room.getHotel().getName() : null);
+        response.setChainName(null);
+        response.setCategory(room.getHotel() != null ? room.getHotel().getCategory() : null);
         response.setRoomNumber(room.getRoomNumber());
         response.setCapacity(room.getCapacity());
         response.setPricePerNight(room.getPricePerNight());
         response.setViewType(room.getViewType() != null ? room.getViewType().name() : null);
         response.setExtendable(room.getExtendable());
         response.setStatus(room.getStatus() != null ? room.getStatus().name() : null);
+        response.setAmenities(extractAmenityNames(room));
         return response;
+    }
+
+    private List<String> extractAmenityNames(Room room) {
+        if (room.getAmenities() == null) {
+            return List.of();
+        }
+
+        return room.getAmenities()
+                .stream()
+                .map(Amenity::getName)
+                .filter(name -> name != null && !name.isBlank())
+                .sorted(Comparator.naturalOrder())
+                .collect(Collectors.toList());
     }
 }

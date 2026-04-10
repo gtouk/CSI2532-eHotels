@@ -1,27 +1,20 @@
 package com.ehotel.dto.response;
 
-public class HotelDetailsResponse {
+import java.util.ArrayList;
+import java.util.List;
 
-    private Long hotelId;
+public class HotelChainSummaryResponse {
+
     private Long chainId;
     private String name;
-    private Integer category;
-    private Integer roomCount;
-    private Long addressId;
-
+    private Integer hotelCount;
     private String address;
     private String city;
     private String province;
     private String country;
     private String postalCode;
-
-    public Long getHotelId() {
-        return hotelId;
-    }
-
-    public void setHotelId(Long hotelId) {
-        this.hotelId = hotelId;
-    }
+    private List<String> emails = new ArrayList<>();
+    private List<String> phones = new ArrayList<>();
 
     public Long getChainId() {
         return chainId;
@@ -39,28 +32,12 @@ public class HotelDetailsResponse {
         this.name = name;
     }
 
-    public Integer getCategory() {
-        return category;
+    public Integer getHotelCount() {
+        return hotelCount;
     }
 
-    public void setCategory(Integer category) {
-        this.category = category;
-    }
-
-    public Integer getRoomCount() {
-        return roomCount;
-    }
-
-    public void setRoomCount(Integer roomCount) {
-        this.roomCount = roomCount;
-    }
-
-    public Long getAddressId() {
-        return addressId;
-    }
-
-    public void setAddressId(Long addressId) {
-        this.addressId = addressId;
+    public void setHotelCount(Integer hotelCount) {
+        this.hotelCount = hotelCount;
     }
 
     public String getAddress() {
@@ -101,5 +78,21 @@ public class HotelDetailsResponse {
 
     public void setPostalCode(String postalCode) {
         this.postalCode = postalCode;
+    }
+
+    public List<String> getEmails() {
+        return emails;
+    }
+
+    public void setEmails(List<String> emails) {
+        this.emails = emails;
+    }
+
+    public List<String> getPhones() {
+        return phones;
+    }
+
+    public void setPhones(List<String> phones) {
+        this.phones = phones;
     }
 }

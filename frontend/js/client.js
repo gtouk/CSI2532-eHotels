@@ -1,4 +1,4 @@
-/**
+ /**
  * client.js — Page-specific logic for the e-Hotels client frontend.
  *
  * Each HTML page sets data-page="..." on <body>.
@@ -11,21 +11,122 @@ document.addEventListener("DOMContentLoaded", function () {
   const page = document.body.dataset.page;
 
   const pages = {
-    "hotel-list":                   initHotelList,
-    "hotel-details":                initHotelDetails,
-    "room-search":                  initRoomSearch,
-    "room-details":                 initRoomDetails,
-    "client-login":                 initLogin,
-    "client-register":              initRegister,
-    "client-dashboard":             initDashboard,
-    "client-profile":               initProfile,
-    "client-reservations":          initReservations,
-    "client-reservation-details":   initReservationDetails,
-    "client-new-reservation":       initNewReservation,
+    "hotel-list": initHotelList,
+    "hotel-details": initHotelDetails,
+    "room-search": initRoomSearch,
+    "room-details": initRoomDetails,
+    "client-login": initLogin,
+    "client-register": initRegister,
+    "client-dashboard": initDashboard,
+    "client-profile": initProfile,
+    "client-reservations": initReservations,
+    "client-reservation-details": initReservationDetails,
+    "client-new-reservation": initNewReservation,
+    "chain-list": initChainList,
+"chain-details": initChainDetails,
   };
 
   if (pages[page]) pages[page]();
 });
+
+/* ====================================================================
+    PUBLIC - Chain list
+    ==================================================================== */
+
+async function initChainList() {
+  const container = document.getElementById("chain-grid");
+  showLoading("chain-grid");
+
+  const res = await apiFetch("GET", "/chains");
+  const chains = Array.isArray(res) ? res : (res && res.data ? res.data : []);
+
+  if (!chains || chains.length === 0) {
+    container.innerHTML = emptyMsg("Aucune chaîne hôtelière disponible.");
+    return;
+  }
+
+  let html = "";
+  for (const c of chains) {
+    const email = c.emails && c.emails.length > 0 ? c.emails[0] : "—";
+    const phone = c.phones && c.phones.length > 0 ? c.phones[0] : "—";
+
+    html +=
+      `<a href="chain-details.html?id=${c.chainId}" class="card" style="text-decoration:none;color:inherit;display:block">` +
+        `<h3>${esc(c.name)}</h3>` +
+        `<p style="color:#777">${esc(c.city || "")}${c.country ? ", " + esc(c.country) : ""}</p>` +
+        `<p style="font-size:0.9rem;color:#999">${esc(c.address || "")}</p>` +
+        `<p style="margin:8px 0 0"><strong>${esc(String(c.hotelCount || 0))}</strong> hôtel(s)</p>` +
+        `<p style="margin:6px 0 0;color:#666"><strong>Email:</strong> ${esc(email)}</p>` +
+        `<p style="margin:4px 0 0;color:#666"><strong>Téléphone:</strong> ${esc(phone)}</p>` +
+      `</a>`;
+  }
+
+  container.innerHTML = `<div class="card-grid">${html}</div>`;
+}
+
+async function initChainDetails() {
+  const chainId = getParam("id");
+  if (!chainId) return;
+
+  const el = document.getElementById("chain-content");
+  showLoading("chain-content");
+
+  const raw = await apiFetch("GET", "/chains/" + chainId);
+  const c = raw && raw.data ? raw.data : raw;
+
+  if (!c || !c.chainId) {
+    el.innerHTML = emptyMsg("Chaîne introuvable.");
+    return;
+  }
+
+  const emailsHtml = c.emails && c.emails.length > 0
+    ? `<ul style="margin-top:8px">${c.emails.map(function (e) { return `<li>${esc(e)}</li>`; }).join("")}</ul>`
+    : `<p style="color:#999">Aucun email.</p>`;
+
+  const phonesHtml = c.phones && c.phones.length > 0
+    ? `<ul style="margin-top:8px">${c.phones.map(function (p) { return `<li>${esc(p)}</li>`; }).join("")}</ul>`
+    : `<p style="color:#999">Aucun téléphone.</p>`;
+
+  const hotelsHtml = c.hotels && c.hotels.length > 0
+    ? `<div class="card-grid">` + c.hotels.map(function (h) {
+        return (
+          `<a href="hotel-details.html?id=${h.hotelId}" class="card" style="text-decoration:none;color:inherit;display:block">` +
+            `<h3>${esc(h.name)} ${starsHTML(h.category || 0)}</h3>` +
+            `<p style="color:#777">${esc(h.city || "")}${h.country ? ", " + esc(h.country) : ""}</p>` +
+            `<p style="font-size:0.9rem;color:#999">${esc(h.address || "")}</p>` +
+          `</a>`
+        );
+      }).join("") + `</div>`
+    : emptyMsg("Aucun hôtel dans cette chaîne.");
+
+  el.innerHTML =
+    `<div class="breadcrumb"><a href="chains.html">Chaînes</a> / ${esc(c.name)}</div>` +
+    `<h1>${esc(c.name)}</h1>` +
+    `<div class="card" style="margin:20px 0">` +
+      `<div class="detail-grid">` +
+        detailItem("Nom", esc(c.name || "—")) +
+        detailItem("Nombre d’hôtels", esc(String(c.hotelCount || 0))) +
+        detailItem("Ville", esc(c.city || "—")) +
+        detailItem("Province", esc(c.province || "—")) +
+        detailItem("Pays", esc(c.country || "—")) +
+        detailItem("Code postal", esc(c.postalCode || "—")) +
+        detailItem("Adresse", esc(c.address || "—")) +
+      `</div>` +
+    `</div>` +
+
+    `<div class="card" style="margin-bottom:20px">` +
+      `<h3>Emails de contact</h3>` +
+      emailsHtml +
+    `</div>` +
+
+    `<div class="card" style="margin-bottom:20px">` +
+      `<h3>Numéros de téléphone</h3>` +
+      phonesHtml +
+    `</div>` +
+
+    `<h2>Hôtels de cette chaîne</h2>` +
+    hotelsHtml;
+}
 
 /* ====================================================================
    PUBLIC — Hotel list
@@ -36,7 +137,7 @@ async function initHotelList() {
   showLoading("hotel-grid");
 
   const res = await apiFetch("GET", "/hotels");
-  const hotels = Array.isArray(res) ? res : (res.success ? res.data : []);
+  const hotels = Array.isArray(res) ? res : (res && res.success ? res.data : []);
 
   if (!hotels || hotels.length === 0) {
     container.innerHTML = emptyMsg("Aucun hôtel disponible pour le moment.");
@@ -47,7 +148,7 @@ async function initHotelList() {
   for (const h of hotels) {
     html +=
       `<a href="hotel-details.html?id=${h.hotelId}" class="card" style="text-decoration:none;color:inherit;display:block">` +
-        `<h3>${esc(h.name)} ${starsHTML(h.category)}</h3>` +
+        `<h3>${esc(h.name)} ${starsHTML(h.category || 0)}</h3>` +
         `<p style="color:#777">${esc(h.city || "")}${h.country ? ", " + esc(h.country) : ""}</p>` +
         `<p style="font-size:0.85rem;color:#999">${esc(h.address || "")}</p>` +
       `</a>`;
@@ -82,11 +183,21 @@ async function initHotelDetails() {
   const startDate = fmt(today);
   const endDate = fmt(tomorrow);
 
+  const addressLine = [
+    h.address || h.streetAddress || ""
+  ].filter(Boolean).join(" ");
+
+  const locationLine = [
+    h.city || "",
+    h.province || "",
+    h.country || ""
+  ].filter(Boolean).join(", ");
+
   el.innerHTML =
     `<div class="breadcrumb"><a href="hotels.html">Hôtels</a> / ${esc(h.name)}</div>` +
     `<h1>${esc(h.name)} ${starsHTML(h.category || 0)}</h1>` +
-    `<p style="color:#777;margin-bottom:8px">${esc(h.address || "")}</p>` +
-    `<p style="color:#777;margin-bottom:24px">${esc(h.city || "")}, ${esc(h.province || "")}, ${esc(h.country || "")}</p>` +
+    `<p style="color:#777;margin-bottom:8px">${esc(addressLine || "—")}</p>` +
+    `<p style="color:#777;margin-bottom:24px">${esc(locationLine || "—")}</p>` +
     `<div class="card" style="margin-bottom:20px">` +
       `<div class="detail-grid">` +
         detailItem("Nom", esc(h.name || "—")) +
@@ -94,7 +205,8 @@ async function initHotelDetails() {
         detailItem("Ville", esc(h.city || "—")) +
         detailItem("Province", esc(h.province || "—")) +
         detailItem("Pays", esc(h.country || "—")) +
-        detailItem("Adresse", esc(h.address || "—")) +
+        detailItem("Code postal", esc(h.postalCode || "—")) +
+        detailItem("Adresse", esc(addressLine || "—")) +
       `</div>` +
     `</div>` +
     `<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">` +
@@ -132,7 +244,6 @@ async function initHotelDetails() {
 async function initRoomSearch() {
   const form = document.getElementById("search-form");
   const resultsEl = document.getElementById("search-results");
-
   const hotelId = getParam("hotelId");
 
   function fmt(d) {
@@ -237,6 +348,12 @@ async function initRoomDetails() {
     return;
   }
 
+  const amenitiesHtml = (r.amenities && r.amenities.length > 0)
+    ? r.amenities.map(function (a) {
+        return `<span class="amenity-tag">${esc(a)}</span>`;
+      }).join("")
+    : `<span style="color:#999">Aucune</span>`;
+
   const p = getPrefix();
   const bookLink = isLoggedIn()
     ? `<a href="${p}client/new-reservation.html?roomId=${r.roomId}" class="btn btn-primary">Réserver cette chambre</a>`
@@ -252,6 +369,10 @@ async function initRoomDetails() {
         detailItem("Extensible", r.extendable ? "Oui" : "Non") +
         detailItem("Prix / nuit", `<span class="price">${num(r.pricePerNight)} $</span>`) +
       `</div>` +
+      `<div style="margin-top:18px">` +
+        `<label style="display:block;margin-bottom:8px;font-weight:600">Commodités</label>` +
+        `<div>${amenitiesHtml}</div>` +
+      `</div>` +
       `<div style="margin-top:20px">${bookLink}</div>` +
     `</div>`;
 }
@@ -262,7 +383,7 @@ async function initRoomDetails() {
 
 function initLogin() {
   if (isEmployeeLoggedIn()) {
-  clearEmployeeSession();
+    clearEmployeeSession();
   }
 
   if (isLoggedIn()) {
@@ -293,7 +414,11 @@ function initLogin() {
       loginClientExclusive(res.data);
       window.location.href = "client/dashboard.html";
     } else {
-      showAlert("danger", res.message || "Identifiants invalides.");
+      let msg = res.message || "Identifiants invalides.";
+      if (res.errors && res.errors.length > 0) {
+        msg += " " + res.errors.map(function (e) { return e.error; }).join(", ");
+      }
+      showAlert("danger", msg);
       btn.disabled = false;
       btn.textContent = "Se connecter";
     }
@@ -389,8 +514,6 @@ async function initDashboard() {
   showLoading("dashboard-content");
 
   const raw = await apiFetch("GET", "/client/dashboard?clientId=" + encodeURIComponent(clientId));
-  console.log("DASHBOARD RESPONSE =", raw);
-
   const d = raw && raw.data ? raw.data : raw;
 
   if (!d || typeof d !== "object") {
@@ -433,8 +556,6 @@ async function initProfile() {
   showLoading("profile-content");
 
   const raw = await apiFetch("GET", "/client/profile?clientId=" + encodeURIComponent(clientId));
-  console.log("PROFILE RESPONSE =", raw);
-
   const prof = raw && raw.data ? raw.data : raw;
 
   if (!prof || typeof prof !== "object") {
@@ -520,8 +641,6 @@ async function initReservations() {
   showLoading("reservations-content");
 
   const raw = await apiFetch("GET", "/client/reservations?clientId=" + encodeURIComponent(clientId));
-  console.log("RESERVATIONS RESPONSE =", raw);
-
   const list = Array.isArray(raw) ? raw : (raw && raw.data ? raw.data : []);
 
   if (!list || list.length === 0) {
@@ -558,8 +677,6 @@ async function initReservationDetails() {
     "/client/reservations/" + encodeURIComponent(id) + "?clientId=" + encodeURIComponent(clientId)
   );
 
-  console.log("RESERVATION DETAILS RESPONSE =", raw);
-
   const r = raw && raw.data ? raw.data : raw;
 
   if (!r || !r.reservationId) {
@@ -588,44 +705,44 @@ async function initReservationDetails() {
         : "") +
     `</div>`;
 
-if (canCancel) {
-  document.getElementById("cancel-btn").addEventListener("click", async function () {
-    if (!confirm("Voulez-vous vraiment annuler cette réservation ?")) return;
+  if (canCancel) {
+    document.getElementById("cancel-btn").addEventListener("click", async function () {
+      if (!confirm("Voulez-vous vraiment annuler cette réservation ?")) return;
 
-    const btn = document.getElementById("cancel-btn");
-    btn.disabled = true;
-    btn.textContent = "Annulation…";
+      const btn = document.getElementById("cancel-btn");
+      btn.disabled = true;
+      btn.textContent = "Annulation…";
 
-    const client = getClient();
-    const clientId = client?.clientId;
+      const client = getClient();
+      const clientId = client?.clientId;
 
-    if (!clientId) {
-      showAlert("danger", "Session client invalide. Reconnectez-vous.");
-      btn.disabled = false;
-      btn.textContent = "Annuler cette réservation";
-      return;
-    }
-
-    const cancelRes = await apiFetch(
-      "POST",
-      "/client/reservations/" + encodeURIComponent(id) + "/cancel?clientId=" + encodeURIComponent(clientId)
-    );
-
-    if (cancelRes.success || (cancelRes && cancelRes.reservationId)) {
-      showAlert("success", "Réservation annulée.");
-      btn.remove();
-      setTimeout(function () { location.reload(); }, 1200);
-    } else {
-      let msg = cancelRes.message || "Impossible d'annuler.";
-      if (cancelRes.errors && cancelRes.errors.length > 0) {
-        msg += " " + cancelRes.errors.map(function (e) { return e.error; }).join(", ");
+      if (!clientId) {
+        showAlert("danger", "Session client invalide. Reconnectez-vous.");
+        btn.disabled = false;
+        btn.textContent = "Annuler cette réservation";
+        return;
       }
-      showAlert("danger", msg);
-      btn.disabled = false;
-      btn.textContent = "Annuler cette réservation";
-    }
-  });
-}
+
+      const cancelRes = await apiFetch(
+        "POST",
+        "/client/reservations/" + encodeURIComponent(id) + "/cancel?clientId=" + encodeURIComponent(clientId)
+      );
+
+      if (cancelRes.success || (cancelRes && cancelRes.reservationId)) {
+        showAlert("success", "Réservation annulée.");
+        btn.remove();
+        setTimeout(function () { location.reload(); }, 1200);
+      } else {
+        let msg = cancelRes.message || "Impossible d'annuler.";
+        if (cancelRes.errors && cancelRes.errors.length > 0) {
+          msg += " " + cancelRes.errors.map(function (e) { return e.error; }).join(", ");
+        }
+        showAlert("danger", msg);
+        btn.disabled = false;
+        btn.textContent = "Annuler cette réservation";
+      }
+    });
+  }
 }
 
 /* ====================================================================
@@ -642,11 +759,11 @@ async function initNewReservation() {
   const totalEl = document.getElementById("total-display");
   let room = null;
 
-  // If a roomId was provided, load room info for the summary
   if (roomId) {
     const res = await apiFetch("GET", "/rooms/" + roomId);
-    if (res.success && res.data) {
-      room = res.data;
+    const data = res && res.data ? res.data : res;
+    if (data && data.roomId) {
+      room = data;
       summaryEl.innerHTML =
         `<h3>Chambre #${esc(room.roomNumber || room.roomId)}</h3>` +
         `<div class="detail-grid">` +
@@ -657,7 +774,6 @@ async function initNewReservation() {
     }
   }
 
-  // Recalculate total when dates change
   function recalculate() {
     if (!room) return;
     const start = form.startDate.value;
@@ -677,7 +793,6 @@ async function initNewReservation() {
   form.startDate.addEventListener("change", recalculate);
   form.endDate.addEventListener("change", recalculate);
 
-  // Submit reservation
   form.addEventListener("submit", async function (e) {
     e.preventDefault();
     clearAlert();
@@ -717,13 +832,15 @@ async function initNewReservation() {
       endDate: endDate
     };
 
-    console.log("RESERVATION PAYLOAD =", payload);
-
     const res = await apiFetch("POST", "/client/reservations", payload);
 
-    if (res.success) {
+    const reservationCreated = res && (res.success === true || res.reservationId || (res.data && res.data.reservationId));
+
+    if (reservationCreated) {
       showAlert("success", "Réservation créée !");
-      setTimeout(function () { window.location.href = "reservations.html"; }, 1500);
+      setTimeout(function () {
+        window.location.href = "reservations.html";
+      }, 1500);
     } else {
       let msg = res.message || "Impossible de créer la réservation.";
       if (res.errors && res.errors.length > 0) {
@@ -740,14 +857,12 @@ async function initNewReservation() {
    Shared HTML builders
    ==================================================================== */
 
-/** Generates the HTML for a single room card (rich layout). */
 function roomCardHTML(r) {
   const p = getPrefix();
 
   const chainName = r.chainName || "";
   const hotelName = r.hotelName || ("Hôtel #" + (r.hotelId || "?"));
 
-  // Tags: capacity, view, surface if available
   let tags = `<span class="room-tag">${capacityLabel(r.capacity)}</span>`;
   if (r.viewType && r.viewType !== "NONE") {
     tags += `<span class="room-tag">👁 ${viewLabel(r.viewType)}</span>`;
@@ -759,7 +874,6 @@ function roomCardHTML(r) {
     tags += `<span class="room-tag room-tag-extra">+ Lit supplémentaire</span>`;
   }
 
-  // Amenities
   let amenitiesHTML = "";
   const amenities = r.amenities || r.commodites || [];
   if (amenities.length > 0) {
@@ -785,7 +899,6 @@ function roomCardHTML(r) {
   );
 }
 
-/** Generates the HTML for a list of reservation items. */
 function reservationListHTML(list) {
   if (!list || list.length === 0) {
     return emptyMsg("Aucune réservation.");

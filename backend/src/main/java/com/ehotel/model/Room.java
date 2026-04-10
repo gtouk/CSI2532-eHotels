@@ -5,6 +5,9 @@ import com.ehotel.enums.ViewType;
 import jakarta.persistence.*;
 
 import java.math.BigDecimal;
+import java.util.HashSet;
+import java.util.Objects;
+import java.util.Set;
 
 @Entity
 @Table(name = "room")
@@ -19,8 +22,16 @@ public class Room {
     @JoinColumn(name = "hotel_id", nullable = false)
     private Hotel hotel;
 
-    @Column(name = "room_number", length = 20)
+    @Column(name = "room_number", nullable = false, length = 20)
     private String roomNumber;
+
+    @ManyToMany
+    @JoinTable(
+            name = "room_amenity",
+            joinColumns = @JoinColumn(name = "room_id"),
+            inverseJoinColumns = @JoinColumn(name = "amenity_id")
+    )
+    private Set<Amenity> amenities = new HashSet<>();
 
     @Column(name = "capacity", nullable = false, length = 50)
     private String capacity;
@@ -66,6 +77,14 @@ public class Room {
         this.roomNumber = roomNumber;
     }
 
+    public Set<Amenity> getAmenities() {
+        return amenities;
+    }
+
+    public void setAmenities(Set<Amenity> amenities) {
+        this.amenities = amenities;
+    }
+
     public String getCapacity() {
         return capacity;
     }
@@ -104,5 +123,17 @@ public class Room {
 
     public void setStatus(RoomStatus status) {
         this.status = status;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Room room)) return false;
+        return Objects.equals(roomId, room.roomId);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(roomId);
     }
 }
