@@ -2,7 +2,6 @@ package com.ehotel.service;
 
 import com.ehotel.dto.response.ReservationSummaryResponse;
 import com.ehotel.enums.ReservationStatus;
-import com.ehotel.enums.RoomStatus;
 import com.ehotel.model.Customer;
 import com.ehotel.model.Reservation;
 import com.ehotel.model.Room;
@@ -23,27 +22,27 @@ import java.util.stream.Collectors;
 @Service
 public class ClientReservationService {
 
-    @Autowired
-    private ReservationRepository reservationRepository;
+    @Autowired private ReservationRepository reservationRepository;
+    @Autowired private RoomRepository roomRepository;
+    @Autowired private RentalRepository rentalRepository;
 
-    @Autowired
-    private RoomRepository roomRepository;
+    @Transactional
+    public ReservationSummaryResponse createReservation(Customer client, Room room,
+                                                         LocalDate startDate, LocalDate endDate) {
+        if (startDate == null || endDate == null)
+            throw new RuntimeException("Les dates sont obligatoires");
+        if (!startDate.isBefore(endDate))
+            throw new RuntimeException("La date d'arrivée doit être avant la date de départ");
+        if (startDate.isBefore(LocalDate.now()))
+            throw new RuntimeException("La date d'arrivée ne peut pas être dans le passé");
 
-    @Autowired
-    private RentalRepository rentalRepository;
-
-    public ReservationSummaryResponse createReservation(Customer client, Room room, LocalDate startDate, LocalDate endDate) {
-        if (startDate == null || endDate == null) {
-            throw new RuntimeException("Start date and end date are required");
-        }
-
-        if (!startDate.isBefore(endDate)) {
-            throw new RuntimeException("startDate must be before endDate");
-        }
-
-        if (room.getStatus() != RoomStatus.AVAILABLE) {
-            throw new RuntimeException("Room is not available");
-        }
+        // Vérifier disponibilité
+        boolean occupied = !reservationRepository
+                .findByRoomAndStatusInAndEndDateAfterAndStartDateBefore(
+                        room, List.of(ReservationStatus.RESERVED), startDate, endDate)
+                .isEmpty();
+        if (occupied)
+            throw new RuntimeException("Cette chambre est déjà réservée pour ces dates");
 
         long nights = ChronoUnit.DAYS.between(startDate, endDate);
         BigDecimal totalPrice = room.getPricePerNight().multiply(BigDecimal.valueOf(nights));
@@ -57,10 +56,8 @@ public class ClientReservationService {
         reservation.setTotalPrice(totalPrice);
         reservation.setCreatedAt(LocalDateTime.now());
 
+        // Le trigger SQL mettra automatiquement la chambre à RESERVED
         reservation = reservationRepository.save(reservation);
-
-        room.setStatus(RoomStatus.RESERVED);
-        roomRepository.save(room);
 
         return mapToSummary(reservation);
     }
@@ -68,37 +65,30 @@ public class ClientReservationService {
     @Transactional(readOnly = true)
     public List<ReservationSummaryResponse> getReservationsByClientId(Long clientId) {
         return reservationRepository.findByCustomerCustomerId(clientId)
-                .stream()
-                .map(this::mapToSummary)
-                .collect(Collectors.toList());
+                .stream().map(this::mapToSummary).collect(Collectors.toList());
     }
 
     @Transactional(readOnly = true)
     public ReservationSummaryResponse getReservationById(Long reservationId) {
         Reservation reservation = reservationRepository.findById(reservationId)
-                .orElseThrow(() -> new RuntimeException("Reservation not found"));
-
+                .orElseThrow(() -> new RuntimeException("Réservation introuvable"));
         return mapToSummary(reservation);
     }
 
     @Transactional
     public ReservationSummaryResponse cancelReservation(Long reservationId, Long clientId) {
         Reservation reservation = reservationRepository.findById(reservationId)
-                .orElseThrow(() -> new RuntimeException("Reservation not found"));
+                .orElseThrow(() -> new RuntimeException("Réservation introuvable"));
 
-        if (reservation.getCustomer() == null || !reservation.getCustomer().getCustomerId().equals(clientId)) {
-            throw new RuntimeException("You can only cancel your own reservation");
-        }
-
-        if (rentalRepository.existsByReservation_ReservationId(reservationId)) {
-            throw new RuntimeException("Reservation already converted to rental and cannot be cancelled");
-        }
-
-        if (reservation.getStatus() == ReservationStatus.CANCELLED) {
-            throw new RuntimeException("Reservation is already cancelled");
-        }
+        if (!reservation.getCustomer().getCustomerId().equals(clientId))
+            throw new RuntimeException("Vous ne pouvez annuler que vos propres réservations");
+        if (rentalRepository.existsByReservation_ReservationId(reservationId))
+            throw new RuntimeException("Cette réservation a déjà été convertie en location");
+        if (reservation.getStatus() == ReservationStatus.CANCELLED)
+            throw new RuntimeException("Cette réservation est déjà annulée");
 
         reservation.setStatus(ReservationStatus.CANCELLED);
+        // Le trigger SQL remettra automatiquement la chambre à AVAILABLE
         reservation = reservationRepository.save(reservation);
 
         return mapToSummary(reservation);
@@ -106,16 +96,13 @@ public class ClientReservationService {
 
     private ReservationSummaryResponse mapToSummary(Reservation reservation) {
         ReservationSummaryResponse response = new ReservationSummaryResponse();
-
         response.setReservationId(reservation.getReservationId());
 
         if (reservation.getCustomer() != null) {
             response.setCustomerId(reservation.getCustomer().getCustomerId());
-            response.setCustomerName(
-                    reservation.getCustomer().getFirstName() + " " + reservation.getCustomer().getLastName()
-            );
+            response.setCustomerName(reservation.getCustomer().getFirstName()
+                    + " " + reservation.getCustomer().getLastName());
         }
-
         if (reservation.getRoom() != null) {
             response.setRoomId(reservation.getRoom().getRoomId());
             response.setRoomNumber(reservation.getRoom().getRoomNumber());
@@ -125,7 +112,6 @@ public class ClientReservationService {
         response.setEndDate(reservation.getEndDate());
         response.setStatus(reservation.getStatus() != null ? reservation.getStatus().name() : null);
         response.setTotalPrice(reservation.getTotalPrice());
-
         return response;
     }
 }

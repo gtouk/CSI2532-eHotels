@@ -19,4 +19,7 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
             LocalDate end);
 
     List<Reservation> findByCustomerCustomerId(Long customerId);
+
+    /** Utilisé par le scheduler d'expiration automatique */
+    List<Reservation> findByStatusAndEndDateBefore(ReservationStatus status, LocalDate date);
 }

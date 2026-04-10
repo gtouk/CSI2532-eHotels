@@ -23,7 +23,7 @@ services:
     depends_on:
       - postgres
     environment:
-      DB_URL: jdbc:postgresql://postgres:5432/ehotel
+      DB_URL: jdbc:postgresql://postgres:5433/ehotel
       DB_USERNAME: postgres
       DB_PASSWORD: postgres
     ports:

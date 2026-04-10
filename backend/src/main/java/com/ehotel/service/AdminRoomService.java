@@ -27,10 +27,7 @@ public class AdminRoomService {
 
     @Transactional(readOnly = true)
     public List<RoomSummaryResponse> getAllRooms() {
-        return roomRepository.findAll()
-                .stream()
-                .map(this::mapToSummary)
-                .collect(Collectors.toList());
+        return roomRepository.findAll().stream().map(this::mapToSummary).collect(Collectors.toList());
     }
 
     @Transactional
@@ -45,10 +42,14 @@ public class AdminRoomService {
         room.setPricePerNight(request.getPricePerNight());
         room.setViewType(request.getViewType());
         room.setExtendable(request.getExtendable() != null ? request.getExtendable() : false);
-        room.setStatus(request.getStatus());
+        room.setSurfaceArea(request.getSurfaceArea());
+        room.setStatus(request.getStatus() != null ? request.getStatus() : com.ehotel.enums.RoomStatus.AVAILABLE);
 
-        Room savedRoom = roomRepository.save(room);
-        return mapToSummary(savedRoom);
+        // Incrémenter le compteur de chambres de l'hôtel
+        hotel.setRoomCount(hotel.getRoomCount() + 1);
+        hotelRepository.save(hotel);
+
+        return mapToSummary(roomRepository.save(room));
     }
 
     @Transactional
@@ -65,10 +66,10 @@ public class AdminRoomService {
         room.setPricePerNight(request.getPricePerNight());
         room.setViewType(request.getViewType());
         room.setExtendable(request.getExtendable() != null ? request.getExtendable() : false);
-        room.setStatus(request.getStatus());
+        room.setSurfaceArea(request.getSurfaceArea());
+        if (request.getStatus() != null) room.setStatus(request.getStatus());
 
-        Room savedRoom = roomRepository.save(room);
-        return mapToSummary(savedRoom);
+        return mapToSummary(roomRepository.save(room));
     }
 
     @Transactional
@@ -76,18 +77,27 @@ public class AdminRoomService {
         Room room = roomRepository.findById(Objects.requireNonNull(roomId))
                 .orElseThrow(() -> new ResourceNotFoundException("Room not found"));
 
-        roomRepository.delete(Objects.requireNonNull(room));
+        // Décrémenter le compteur
+        Hotel hotel = room.getHotel();
+        if (hotel != null && hotel.getRoomCount() > 0) {
+            hotel.setRoomCount(hotel.getRoomCount() - 1);
+            hotelRepository.save(hotel);
+        }
+
+        roomRepository.delete(room);
     }
 
     private RoomSummaryResponse mapToSummary(Room room) {
         RoomSummaryResponse response = new RoomSummaryResponse();
         response.setRoomId(room.getRoomId());
         response.setHotelId(room.getHotel() != null ? room.getHotel().getHotelId() : null);
+        response.setHotelName(room.getHotel() != null ? room.getHotel().getName() : null);
         response.setRoomNumber(room.getRoomNumber());
         response.setCapacity(room.getCapacity());
         response.setPricePerNight(room.getPricePerNight());
         response.setViewType(room.getViewType() != null ? room.getViewType().name() : null);
         response.setExtendable(room.getExtendable());
+        response.setSurfaceArea(room.getSurfaceArea());
         response.setStatus(room.getStatus() != null ? room.getStatus().name() : null);
         return response;
     }

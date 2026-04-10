@@ -1,55 +1,53 @@
 -- =====================================================
--- 06_views_en.sql
--- SQL views for e-Hotels
+-- 06_views.sql — Vues SQL e-Hotels
 -- =====================================================
 
--- -----------------------------------------------------
--- View 1
--- Number of available rooms by area
--- Here, the area is represented by the city
--- -----------------------------------------------------
+-- Vue 1: Nombre de chambres disponibles par zone (ville)
 CREATE OR REPLACE VIEW available_rooms_by_area AS
 SELECT
-    a.city AS area,
-    COUNT(rm.room_id) AS available_room_count
-FROM room rm
-JOIN hotel h ON rm.hotel_id = h.hotel_id
-JOIN address a ON h.address_id = a.address_id
-WHERE rm.room_id NOT IN (
-    SELECT r.room_id
-    FROM reservation r
-    WHERE CURRENT_DATE < r.end_date
-      AND CURRENT_DATE >= r.start_date
-)
-AND rm.room_id NOT IN (
-    SELECT rt.room_id
-    FROM rental rt
-    WHERE CURRENT_DATE < rt.end_date
-      AND CURRENT_DATE >= rt.start_date
-)
-GROUP BY a.city
-ORDER BY a.city;
+    a.city                 AS zone,
+    hc.name                AS chaine,
+    h.category,
+    COUNT(r.room_id)       AS nb_chambres_disponibles,
+    AVG(r.price)::DECIMAL(10,2) AS prix_moyen
+FROM room r
+JOIN hotel       h  ON r.hotel_id  = h.hotel_id
+JOIN hotel_chain hc ON h.chain_id  = hc.chain_id
+JOIN address     a  ON h.address_id = a.address_id
+WHERE r.status = 'AVAILABLE'
+  AND r.room_id NOT IN (
+      SELECT res.room_id FROM reservation res
+      WHERE res.status = 'RESERVED'
+        AND CURRENT_DATE BETWEEN res.start_date AND res.end_date - 1
+  )
+  AND r.room_id NOT IN (
+      SELECT ren.room_id FROM rental ren
+      WHERE ren.status = 'ACTIVE'
+        AND CURRENT_DATE BETWEEN ren.start_date AND ren.end_date - 1
+  )
+GROUP BY a.city, hc.name, h.category
+ORDER BY a.city, hc.name;
 
--- -----------------------------------------------------
--- View 2
--- Total room capacity for a hotel
--- Converts textual capacity into numeric values
--- -----------------------------------------------------
+-- Vue 2: Capacité totale des chambres par hôtel
 CREATE OR REPLACE VIEW hotel_total_capacity AS
 SELECT
     h.hotel_id,
-    h.name AS hotel_name,
+    h.name                    AS hotel_name,
+    hc.name                   AS chaine,
+    h.category,
+    COUNT(r.room_id)          AS nb_chambres,
     SUM(
-        CASE rm.capacity
-            WHEN 'simple' THEN 1
+        CASE r.capacity
+            WHEN 'single' THEN 1
             WHEN 'double' THEN 2
             WHEN 'triple' THEN 3
-            WHEN 'suite' THEN 4
-            WHEN 'familiale' THEN 5
+            WHEN 'suite'  THEN 4
+            WHEN 'family' THEN 5
             ELSE 0
         END
-    ) AS total_capacity
+    )                         AS capacite_totale_personnes
 FROM hotel h
-JOIN room rm ON h.hotel_id = rm.hotel_id
-GROUP BY h.hotel_id, h.name
+JOIN hotel_chain hc ON h.chain_id = hc.chain_id
+LEFT JOIN room r    ON h.hotel_id = r.hotel_id
+GROUP BY h.hotel_id, h.name, hc.name, h.category
 ORDER BY h.hotel_id;
