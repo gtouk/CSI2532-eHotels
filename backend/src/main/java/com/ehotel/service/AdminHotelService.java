@@ -45,13 +45,8 @@ public class AdminHotelService {
         hotel.setRoomCount(0);
         hotel.setAddressId(savedAddress.getAddressId());
 
-        hotel.setAddress(request.getAddress());
-        hotel.setCity(request.getCity());
-        hotel.setCountry(request.getCountry());
-        hotel.setPostalCode(request.getPostalCode());
-
         Hotel savedHotel = hotelRepository.save(hotel);
-        return mapToSummary(savedHotel);
+        return mapToSummary(savedHotel, savedAddress);
     }
 
     @Transactional
@@ -71,13 +66,8 @@ public class AdminHotelService {
             hotel.setRoomCount(0);
         }
 
-        hotel.setAddress(request.getAddress());
-        hotel.setCity(request.getCity());
-        hotel.setCountry(request.getCountry());
-        hotel.setPostalCode(request.getPostalCode());
-
         Hotel savedHotel = hotelRepository.save(hotel);
-        return mapToSummary(savedHotel);
+        return mapToSummary(savedHotel, savedAddress);
     }
 
     @Transactional
@@ -127,8 +117,37 @@ public class AdminHotelService {
         response.setCategory(hotel.getCategory());
         response.setAddress(hotel.getAddress());
         response.setCity(hotel.getCity());
+        response.setProvince(hotel.getProvince());
         response.setCountry(hotel.getCountry());
         response.setPostalCode(hotel.getPostalCode());
         return response;
+    }
+
+    private HotelSummaryResponse mapToSummary(Hotel hotel, Address address) {
+        HotelSummaryResponse response = new HotelSummaryResponse();
+        response.setHotelId(hotel.getHotelId());
+        response.setChainId(hotel.getChainId());
+        response.setName(hotel.getName());
+        response.setCategory(hotel.getCategory());
+
+        String fullAddress = buildAddressLine(address);
+        response.setAddress(fullAddress);
+        response.setCity(address.getCity());
+        response.setProvince(address.getProvince());
+        response.setCountry(address.getCountry());
+        response.setPostalCode(address.getPostalCode());
+
+        return response;
+    }
+
+    private String buildAddressLine(Address address) {
+        String number = address.getStreetNumber() != null
+                ? String.valueOf(address.getStreetNumber())
+                : "";
+        String street = address.getStreetName() != null
+                ? address.getStreetName()
+                : "";
+        String full = (number + " " + street).trim();
+        return full.isEmpty() ? null : full;
     }
 }

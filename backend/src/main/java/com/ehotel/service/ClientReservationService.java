@@ -87,19 +87,17 @@ public class ClientReservationService {
                 .orElseThrow(() -> new RuntimeException("Reservation not found"));
 
         if (reservation.getCustomer() == null || !reservation.getCustomer().getCustomerId().equals(clientId)) {
-            throw new RuntimeException("You can only cancel your own reservation");
-        }
-
-        if (rentalRepository.existsByReservation_ReservationId(reservationId)) {
-            throw new RuntimeException("Reservation already converted to rental and cannot be cancelled");
-        }
-
-        if (reservation.getStatus() == ReservationStatus.CANCELLED) {
-            throw new RuntimeException("Reservation is already cancelled");
+            throw new RuntimeException("Unauthorized reservation access");
         }
 
         reservation.setStatus(ReservationStatus.CANCELLED);
-        reservation = reservationRepository.save(reservation);
+        reservationRepository.save(reservation);
+
+        Room room = reservation.getRoom();
+        if (room != null) {
+            room.setStatus(RoomStatus.AVAILABLE);
+            roomRepository.save(room);
+        }
 
         return mapToSummary(reservation);
     }

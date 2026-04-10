@@ -5,12 +5,14 @@ import com.ehotel.dto.response.EmployeeAuthResponse;
 import com.ehotel.exception.ResourceNotFoundException;
 import com.ehotel.model.Employee;
 import com.ehotel.repository.EmployeeRepository;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 @Service
 public class EmployeeAuthService {
 
     private final EmployeeRepository employeeRepository;
+    private final BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
     public EmployeeAuthService(EmployeeRepository employeeRepository) {
         this.employeeRepository = employeeRepository;
@@ -20,7 +22,7 @@ public class EmployeeAuthService {
         Employee employee = employeeRepository.findByEmail(request.getEmail())
                 .orElseThrow(() -> new ResourceNotFoundException("Employee not found"));
 
-        if (employee.getPassword() == null || !employee.getPassword().equals(request.getPassword())) {
+        if (employee.getPassword() == null || !passwordEncoder.matches(request.getPassword(), employee.getPassword())) {
             throw new IllegalArgumentException("Invalid email or password");
         }
 

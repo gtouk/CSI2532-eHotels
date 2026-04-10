@@ -111,20 +111,20 @@ public class Employee {
         this.role = role;
     }
 
-    public String getPassword() {
-        return password;
-    }
-
-    public void setPassword(String password) {
-        this.password = password;
-    }
-
     public Long getAddressId() {
         return addressId;
     }
 
     public void setAddressId(Long addressId) {
         this.addressId = addressId;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
     }
 
     public Boolean getActive() {

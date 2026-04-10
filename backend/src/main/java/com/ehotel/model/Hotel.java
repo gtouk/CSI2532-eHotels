@@ -33,6 +33,9 @@ public class Hotel {
     private String city;
 
     @Transient
+    private String province;
+
+    @Transient
     private String country;
 
     @Transient
@@ -103,6 +106,14 @@ public class Hotel {
 
     public void setCity(String city) {
         this.city = city;
+    }
+
+    public String getProvince() {
+        return province;
+    }
+
+    public void setProvince(String province) {
+        this.province = province;
     }
 
     public String getCountry() {

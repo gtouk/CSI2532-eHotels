@@ -8,6 +8,7 @@ public class HotelSummaryResponse {
     private Integer category;
     private String address;
     private String city;
+    private String province;
     private String country;
     private String postalCode;
 
@@ -60,6 +61,14 @@ public class HotelSummaryResponse {
 
     public void setCity(String city) {
         this.city = city;
+    }
+
+    public String getProvince() {
+        return province;
+    }
+
+    public void setProvince(String province) {
+        this.province = province;
     }
 
     public String getCountry() {

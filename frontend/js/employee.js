@@ -9,22 +9,22 @@ document.addEventListener("DOMContentLoaded", function () {
   const page = document.body.dataset.page;
 
   const pages = {
-    "employee-login":              initEmployeeLogin,
-    "employee-dashboard":          initEmployeeDashboard,
-    "employee-reservations":       initEmployeeReservations,
+    "employee-login": initEmployeeLogin,
+    "employee-dashboard": initEmployeeDashboard,
+    "employee-reservations": initEmployeeReservations,
     "employee-reservation-details": initEmployeeReservationDetails,
-    "employee-rentals":            initEmployeeRentals,
-    "employee-rental-details":     initEmployeeRentalDetails,
-    "employee-customers":          initEmployeeCustomers,
-    "employee-customer-details":   initEmployeeCustomerDetails,
-    "employee-rooms":              initEmployeeRooms,
-    "employee-admin-hotels":       initAdminHotels,
-    "employee-admin-hotel-form":   initAdminHotelForm,
-    "employee-admin-rooms":        initAdminRooms,
-    "employee-admin-room-form":    initAdminRoomForm,
-    "employee-admin-employees":    initAdminEmployees,
+    "employee-rentals": initEmployeeRentals,
+    "employee-rental-details": initEmployeeRentalDetails,
+    "employee-customers": initEmployeeCustomers,
+    "employee-customer-details": initEmployeeCustomerDetails,
+    "employee-rooms": initEmployeeRooms,
+    "employee-admin-hotels": initAdminHotels,
+    "employee-admin-hotel-form": initAdminHotelForm,
+    "employee-admin-rooms": initAdminRooms,
+    "employee-admin-room-form": initAdminRoomForm,
+    "employee-admin-employees": initAdminEmployees,
     "employee-admin-employee-form": initAdminEmployeeForm,
-    "employee-admin-reports":      initAdminReports,
+    "employee-admin-reports": initAdminReports,
   };
 
   if (page === "employee-login") {
@@ -93,9 +93,12 @@ function initEmployeeLogin() {
     if (res.success && res.data) {
       loginEmployeeExclusive(res.data);
       window.location.href = getPrefix() + "employee/dashboard.html";
-    }
-     else {
-      showAlert("danger", res.message || "Identifiants invalides.");
+    } else {
+      let msg = res.message || "Identifiants invalides.";
+      if (res.errors && res.errors.length > 0) {
+        msg += " " + res.errors.map(function (e) { return e.error; }).join(", ");
+      }
+      showAlert("danger", msg);
       btn.disabled = false;
       btn.textContent = "Se connecter";
     }
@@ -457,33 +460,56 @@ async function initAdminHotelForm() {
   if (!form) return;
 
   const id = getParam("id");
-  const chainsRes = await apiFetch("GET", "/chains");
   const sel = form.chainId;
-  if (chainsRes.success && chainsRes.data && chainsRes.data.length > 0) {
-    chainsRes.data.forEach(function (c) {
+
+  sel.innerHTML = "";
+
+  const chainsRes = await apiFetch("GET", "/chains");
+  console.log("CHAINS RESPONSE =", chainsRes);
+
+  const chains = Array.isArray(chainsRes)
+    ? chainsRes
+    : (chainsRes && Array.isArray(chainsRes.data) ? chainsRes.data : []);
+
+  console.log("CHAINS PARSED =", chains);
+
+  if (chains.length > 0) {
+    chains.forEach(function (c) {
       const o = document.createElement("option");
-      o.value = c.chainId;
-      o.textContent = c.name;
+      o.value = String(c.chainId);
+      o.textContent = (c.name || ("Chaîne #" + c.chainId)) + " (#" + c.chainId + ")";
       sel.appendChild(o);
     });
   } else {
-    const o = document.createElement("option");
-    o.value = "1";
-    o.textContent = "Chaîne #1 (saisir l’ID réel si différent)";
-    sel.appendChild(o);
+    const fallback = document.createElement("option");
+    fallback.value = "2";
+    fallback.textContent = "Chaine Test (#2)";
+    sel.appendChild(fallback);
   }
 
   if (id) {
     const listRes = await apiFetch("GET", "/employee/admin/hotels");
-    const list = listRes.success ? listRes.data : [];
-    const h = list && list.find(function (x) { return String(x.hotelId) === String(id); });
+    const list = Array.isArray(listRes)
+      ? listRes
+      : (listRes && Array.isArray(listRes.data) ? listRes.data : []);
+
+    const h = list.find(function (x) {
+      return String(x.hotelId) === String(id);
+    });
+
     if (h) {
-      if (h.chainId && !Array.from(form.chainId.options).some(function (o) { return o.value === String(h.chainId); })) {
+      if (
+        h.chainId &&
+        !Array.from(form.chainId.options).some(function (o) {
+          return o.value === String(h.chainId);
+        })
+      ) {
         const o = document.createElement("option");
-        o.value = h.chainId;
+        o.value = String(h.chainId);
         o.textContent = "Chaîne #" + h.chainId;
         form.chainId.appendChild(o);
       }
+
       form.chainId.value = h.chainId || "";
       form.name.value = h.name || "";
       form.category.value = h.category != null ? h.category : "";
@@ -492,6 +518,7 @@ async function initAdminHotelForm() {
       form.province.value = h.province || "";
       form.country.value = h.country || "";
       form.postalCode.value = h.postalCode || "";
+
       const ft = document.getElementById("form-title");
       if (ft) ft.textContent = "Modifier l’hôtel";
     }
@@ -500,6 +527,7 @@ async function initAdminHotelForm() {
   form.addEventListener("submit", async function (e) {
     e.preventDefault();
     clearAlert();
+
     const data = {
       chainId: Number(form.chainId.value),
       name: form.name.value.trim(),
@@ -510,6 +538,7 @@ async function initAdminHotelForm() {
       country: form.country.value.trim(),
       postalCode: form.postalCode.value.trim(),
     };
+
     const btn = form.querySelector("button[type=submit]");
     btn.disabled = true;
 
@@ -522,9 +551,15 @@ async function initAdminHotelForm() {
 
     if (out.success) {
       showAlert("success", "Hôtel enregistré.");
-      setTimeout(function () { window.location.href = "hotels.html"; }, 900);
+      setTimeout(function () {
+        window.location.href = "hotels.html";
+      }, 900);
     } else {
-      showAlert("danger", out.message || "Erreur.");
+      let msg = out.message || "Erreur.";
+      if (out.errors && out.errors.length > 0) {
+        msg += " " + out.errors.map(function (e) { return e.error; }).join(", ");
+      }
+      showAlert("danger", msg);
       btn.disabled = false;
     }
   });
@@ -586,6 +621,7 @@ async function initAdminRoomForm() {
   const hotelsRes = await apiFetch("GET", "/employee/admin/hotels");
   const hotels = hotelsRes.success ? hotelsRes.data : [];
   const sel = form.hotelId;
+
   hotels.forEach(function (h) {
     const o = document.createElement("option");
     o.value = h.hotelId;
@@ -597,6 +633,7 @@ async function initAdminRoomForm() {
     const listRes = await apiFetch("GET", "/employee/admin/rooms");
     const list = listRes.success ? listRes.data : [];
     const r = list && list.find(function (x) { return String(x.roomId) === String(id); });
+
     if (r) {
       form.hotelId.value = r.hotelId || "";
       form.roomNumber.value = r.roomNumber || "";
@@ -605,6 +642,12 @@ async function initAdminRoomForm() {
       form.viewType.value = r.viewType || "NONE";
       form.extendable.checked = !!r.extendable;
       form.status.value = r.status || "AVAILABLE";
+
+      const roomAmenities = r.amenities || [];
+      form.querySelectorAll('input[name="amenities"]').forEach(function (cb) {
+        cb.checked = roomAmenities.includes(cb.value);
+      });
+
       const ft = document.getElementById("form-title");
       if (ft) ft.textContent = "Modifier la chambre";
     }
@@ -613,6 +656,13 @@ async function initAdminRoomForm() {
   form.addEventListener("submit", async function (e) {
     e.preventDefault();
     clearAlert();
+
+    const amenities = Array.from(
+      form.querySelectorAll('input[name="amenities"]:checked')
+    ).map(function (cb) {
+      return cb.value;
+    });
+
     const data = {
       hotelId: Number(form.hotelId.value),
       roomNumber: form.roomNumber.value.trim(),
@@ -621,7 +671,9 @@ async function initAdminRoomForm() {
       viewType: form.viewType.value,
       extendable: form.extendable.checked,
       status: form.status.value,
+      amenities: amenities
     };
+
     const btn = form.querySelector("button[type=submit]");
     btn.disabled = true;
 
@@ -632,11 +684,15 @@ async function initAdminRoomForm() {
       out = await apiFetch("POST", "/employee/admin/rooms", data);
     }
 
-    if (out.success) {
+    if (out.success || out.roomId) {
       showAlert("success", "Chambre enregistrée.");
       setTimeout(function () { window.location.href = "rooms.html"; }, 900);
     } else {
-      showAlert("danger", out.message || "Erreur.");
+      let msg = out.message || "Erreur.";
+      if (out.errors && out.errors.length > 0) {
+        msg += " " + out.errors.map(function (e) { return e.error; }).join(", ");
+      }
+      showAlert("danger", msg);
       btn.disabled = false;
     }
   });

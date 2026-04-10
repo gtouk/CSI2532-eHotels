@@ -13,10 +13,6 @@ const API_BASE = "http://localhost:8080";
 
 /* ---------- API ---------- */
 
-/**
- * Sends an HTTP request to the backend and returns the parsed JSON response.
- * Every backend endpoint returns { success, message, data?, errors? }.
- */
 async function apiFetch(method, path, body) {
   const options = {
     method: method,
@@ -29,14 +25,25 @@ async function apiFetch(method, path, body) {
 
   try {
     const res = await fetch(API_BASE + path, options);
-    return await res.json();
+    const text = await res.text();
+
+    try {
+      return JSON.parse(text);
+    } catch {
+      return {
+        success: res.ok,
+        message: text || "Réponse invalide du serveur.",
+        data: null,
+        errors: null
+      };
+    }
   } catch (err) {
     console.error("API call failed:", method, path, err);
     return { success: false, message: "Impossible de joindre le serveur." };
   }
 }
 
-/* ---------- Client session (localStorage) ---------- */
+/* ---------- Client session ---------- */
 
 const SESSION_KEY = "ehotel_client";
 
@@ -60,11 +67,6 @@ function isLoggedIn() {
   return getClient() !== null;
 }
 
-/**
- * Redirects to the login page when the user is not authenticated.
- * Call at the top of every /client/ page init function.
- * Returns true if the user IS logged in so the caller can proceed.
- */
 function requireAuth() {
   if (!isLoggedIn()) {
     window.location.href = getPrefix() + "client-login.html";
@@ -75,10 +77,6 @@ function requireAuth() {
 
 /* ---------- Path prefix ---------- */
 
-/**
- * Relative path from the current HTML file to the frontend root
- * (where index.html, css/, js/ live).
- */
 function getPrefix() {
   const path = window.location.pathname;
   if (path.includes("/employee/admin/")) return "../../";
@@ -87,12 +85,11 @@ function getPrefix() {
   return "";
 }
 
-/** Alias for employee portal pages (same as getPrefix). */
 function getEmployeeAssetPrefix() {
   return getPrefix();
 }
 
-/* ---------- Employee session (localStorage) ---------- */
+/* ---------- Employee session ---------- */
 
 const EMPLOYEE_SESSION_KEY = "ehotel_employee";
 
@@ -121,10 +118,6 @@ function isManager() {
   return e && e.role === "GESTIONNAIRE";
 }
 
-/**
- * Redirects to employee login if not authenticated as employee.
- * @returns {boolean}
- */
 function requireEmployeeAuth() {
   if (!isEmployeeLoggedIn()) {
     window.location.href = getPrefix() + "employee-login.html";
@@ -133,10 +126,6 @@ function requireEmployeeAuth() {
   return true;
 }
 
-/**
- * Redirects non-managers away from admin pages.
- * @returns {boolean}
- */
 function requireManager() {
   if (!isManager()) {
     window.location.href = getPrefix() + "employee/dashboard.html";
@@ -153,6 +142,7 @@ function renderNavbar() {
 
   const p = getPrefix();
   const client = getClient();
+  const emp = getEmployee();
 
   let right = "";
   if (client) {
@@ -167,7 +157,6 @@ function renderNavbar() {
       `<a href="${p}client-register.html" class="btn btn-sm btn-primary">Inscription</a>`;
   }
 
-  const emp = getEmployee();
   let empNav = "";
   if (emp) {
     empNav =
@@ -180,14 +169,16 @@ function renderNavbar() {
 
   el.innerHTML =
     `<nav><div class="container" style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px">` +
-    `<a href="${p}index.html" class="logo">e-Hotels</a>` +
-    `<div class="nav-links">` +
-    `<a href="${p}index.html">Accueil</a>` +
-    `<a href="${p}hotels.html">Hôtels</a>` +
-    `<a href="${p}room-search.html">Recherche</a>` +
-    empNav +
-    right +
-    `</div></div></nav>`;
+      `<a href="${p}index.html" class="logo">e-Hotels</a>` +
+      `<div class="nav-links">` +
+        `<a href="${p}index.html">Accueil</a>` +
+        `<a href="${p}chains.html">Chaînes</a>` +
+        `<a href="${p}hotels.html">Hôtels</a>` +
+        `<a href="${p}room-search.html">Recherche</a>` +
+        empNav +
+        right +
+      `</div>` +
+    `</div></nav>`;
 
   const logoutBtn = document.getElementById("btn-logout");
   if (logoutBtn) {
@@ -222,7 +213,7 @@ function clearAlert() {
   if (box) box.innerHTML = "";
 }
 
-/* ---------- Formatting helpers ---------- */
+/* ---------- Helpers ---------- */
 
 function loginClientExclusive(data) {
   clearEmployeeSession();
@@ -254,7 +245,8 @@ function starsHTML(n) {
 }
 
 function badgeHTML(status) {
-  return `<span class="badge badge-${status.toLowerCase()}">${status}</span>`;
+  const s = status || "UNKNOWN";
+  return `<span class="badge badge-${s.toLowerCase()}">${s}</span>`;
 }
 
 function viewLabel(type) {
@@ -267,24 +259,20 @@ function capacityLabel(cap) {
   return labels[cap] || cap || "—";
 }
 
-/** Escape HTML special characters to prevent XSS. */
 function esc(str) {
   const d = document.createElement("div");
   d.textContent = str == null ? "" : str;
   return d.innerHTML;
 }
 
-/** Read a query-string parameter by name. */
 function getParam(key) {
   return new URLSearchParams(window.location.search).get(key);
 }
 
-/** Replace the contents of an element with a centered spinner. */
 function showLoading(elementId) {
   const el = document.getElementById(elementId);
   if (el) {
-    el.innerHTML =
-      '<div class="loading"><div class="spinner"></div><p>Chargement…</p></div>';
+    el.innerHTML = '<div class="loading"><div class="spinner"></div><p>Chargement…</p></div>';
   }
 }
 

@@ -1,20 +1,23 @@
 package com.ehotel.dto.response;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.List;
 
 public class RoomDetailsResponse {
 
     private Long roomId;
     private Long hotelId;
+    private String hotelName;
+    private String chainName;
+    private Integer category;
     private String roomNumber;
     private String capacity;
     private BigDecimal pricePerNight;
     private String viewType;
     private Boolean extendable;
     private String status;
-
-    public RoomDetailsResponse() {
-    }
+    private List<String> amenities = new ArrayList<>();
 
     public Long getRoomId() {
         return roomId;
@@ -30,6 +33,30 @@ public class RoomDetailsResponse {
 
     public void setHotelId(Long hotelId) {
         this.hotelId = hotelId;
+    }
+
+    public String getHotelName() {
+        return hotelName;
+    }
+
+    public void setHotelName(String hotelName) {
+        this.hotelName = hotelName;
+    }
+
+    public String getChainName() {
+        return chainName;
+    }
+
+    public void setChainName(String chainName) {
+        this.chainName = chainName;
+    }
+
+    public Integer getCategory() {
+        return category;
+    }
+
+    public void setCategory(Integer category) {
+        this.category = category;
     }
 
     public String getRoomNumber() {
@@ -78,5 +105,13 @@ public class RoomDetailsResponse {
 
     public void setStatus(String status) {
         this.status = status;
+    }
+
+    public List<String> getAmenities() {
+        return amenities;
+    }
+
+    public void setAmenities(List<String> amenities) {
+        this.amenities = amenities;
     }
 }
