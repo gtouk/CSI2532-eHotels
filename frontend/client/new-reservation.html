@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Nouvelle réservation — e-Hotels</title>
+  <link rel="stylesheet" href="../css/base.css">
+  <link rel="stylesheet" href="../css/components.css">
+  <link rel="stylesheet" href="../css/client.css">
+</head>
+<body data-page="client-new-reservation">
+
+  <div id="navbar"></div>
+
+  <main>
+    <div class="container">
+      <div class="client-layout">
+        <aside class="sidebar">
+          <h4>Mon espace</h4>
+          <ul>
+            <li><a href="dashboard.html">Tableau de bord</a></li>
+            <li><a href="reservations.html">Mes réservations</a></li>
+            <li><a href="profile.html">Mon profil</a></li>
+            <li><a href="../room-search.html">Rechercher</a></li>
+          </ul>
+        </aside>
+        <section style="min-width:0">
+          <div class="breadcrumb">
+            <a href="reservations.html">Réservations</a> / Nouvelle
+          </div>
+          <h1>Nouvelle réservation</h1>
+
+          <div id="alert-box" style="margin-top:12px"></div>
+
+          <div class="booking-summary" id="booking-summary" style="margin-top:16px">
+            <p style="color:#999">
+              Sélectionnez une chambre depuis la <a href="../room-search.html">recherche</a>
+              pour pré-remplir les détails.
+            </p>
+          </div>
+
+          <div class="card">
+            <h3>Dates du séjour</h3>
+            <form id="reservation-form" style="margin-top:12px">
+              <div class="form-row">
+                <div>
+                  <label for="startDate">Date d'arrivée</label>
+                  <input type="date" id="startDate" name="startDate" required>
+                </div>
+                <div>
+                  <label for="endDate">Date de départ</label>
+                  <input type="date" id="endDate" name="endDate" required>
+                </div>
+              </div>
+
+              <div class="booking-total">
+                <span style="color:#999" id="price-display">Sélectionnez les dates</span>
+                <div>
+                  <span style="font-size:0.85rem;color:#999">Total : </span>
+                  <span class="price" id="total-display">—</span>
+                </div>
+              </div>
+
+              <div style="margin-top:16px">
+                <button type="submit" class="btn btn-primary">Confirmer la réservation</button>
+              </div>
+            </form>
+          </div>
+        </section>
+      </div>
+    </div>
+  </main>
+
+  <footer>
+    <p>e-Hotels — Projet CSI2532 — Université d'Ottawa</p>
+  </footer>
+
+  <script src="../js/main.js"></script>
+  <script src="../js/client.js"></script>
+</body>
+</html>

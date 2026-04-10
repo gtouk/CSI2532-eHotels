@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin — Hôtels — e-Hotels</title>
+  <link rel="stylesheet" href="../../css/base.css">
+  <link rel="stylesheet" href="../../css/components.css">
+  <link rel="stylesheet" href="../../css/client.css">
+  <link rel="stylesheet" href="../../css/employee.css">
+</head>
+<body data-page="employee-admin-hotels">
+
+  <div id="navbar"></div>
+
+  <main>
+    <div class="container">
+      <div class="employee-layout">
+        <aside class="sidebar">
+          <h4>Portail employé</h4>
+          <ul>
+            <li><a href="../dashboard.html">Tableau de bord</a></li>
+            <li><a href="../reservations.html">Réservations</a></li>
+            <li><a href="../rentals.html">Locations</a></li>
+            <li><a href="../customers.html">Clients</a></li>
+            <li><a href="../rooms.html">Chambres</a></li>
+          </ul>
+          <div class="admin-block">
+            <h4>Administration</h4>
+            <ul>
+              <li><a href="hotels.html" class="active">Hôtels</a></li>
+              <li><a href="rooms.html">Chambres (admin)</a></li>
+              <li><a href="employees.html">Employés</a></li>
+              <li><a href="reports.html">Rapports</a></li>
+            </ul>
+          </div>
+        </aside>
+        <section>
+          <h1>Gestion des hôtels</h1>
+          <p style="color:#777;margin-bottom:16px">Réservé aux gestionnaires.</p>
+          <div id="list-content"></div>
+        </section>
+      </div>
+    </div>
+  </main>
+
+  <footer>
+    <p>e-Hotels — Projet CSI2532 — Université d'Ottawa</p>
+  </footer>
+
+  <script src="../../js/main.js"></script>
+  <script src="../../js/employee.js"></script>
+</body>
+</html>
