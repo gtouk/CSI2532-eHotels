@@ -224,6 +224,16 @@ function clearAlert() {
 
 /* ---------- Formatting helpers ---------- */
 
+function loginClientExclusive(data) {
+  clearEmployeeSession();
+  saveClient(data);
+}
+
+function loginEmployeeExclusive(data) {
+  clearSession();
+  saveEmployee(data);
+}
+
 function formatDate(str) {
   if (!str) return "—";
   const d = new Date(str + "T00:00:00");

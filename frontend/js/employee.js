@@ -60,6 +60,10 @@ function empNum(v) {
 /* ---------- Login ---------- */
 
 function initEmployeeLogin() {
+  if (isLoggedIn()) {
+    clearSession();
+  }
+
   if (isEmployeeLoggedIn()) {
     window.location.href = getPrefix() + "employee/dashboard.html";
     return;
@@ -87,9 +91,10 @@ function initEmployeeLogin() {
     const res = await apiFetch("POST", "/employee/login", { email, password });
 
     if (res.success && res.data) {
-      saveEmployee(res.data);
+      loginEmployeeExclusive(res.data);
       window.location.href = getPrefix() + "employee/dashboard.html";
-    } else {
+    }
+     else {
       showAlert("danger", res.message || "Identifiants invalides.");
       btn.disabled = false;
       btn.textContent = "Se connecter";
