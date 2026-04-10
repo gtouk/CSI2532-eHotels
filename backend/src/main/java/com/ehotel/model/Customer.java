@@ -1,3 +1,4 @@
+
 package com.ehotel.model;
 
 import jakarta.persistence.*;

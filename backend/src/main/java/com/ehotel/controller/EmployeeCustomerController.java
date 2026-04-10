@@ -22,15 +22,13 @@ public class EmployeeCustomerController {
     public ApiResponse<List<CustomerSummaryResponse>> getAllCustomers() {
         return ApiResponse.success(
                 "Customers fetched successfully",
-                employeeCustomerService.getAllCustomers()
-        );
+                employeeCustomerService.getAllCustomers());
     }
 
     @GetMapping("/{customerId}")
     public ApiResponse<CustomerDetailsResponse> getCustomerById(@PathVariable Long customerId) {
         return ApiResponse.success(
                 "Customer fetched successfully",
-                employeeCustomerService.getCustomerById(customerId)
-        );
+                employeeCustomerService.getCustomerById(customerId));
     }
 }

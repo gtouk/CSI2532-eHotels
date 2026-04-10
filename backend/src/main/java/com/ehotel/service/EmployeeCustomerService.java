@@ -74,19 +74,23 @@ public class EmployeeCustomerService {
             sb.append(address.getStreetName());
         }
         if (address.getCity() != null && !address.getCity().isBlank()) {
-            if (sb.length() > 0) sb.append(", ");
+            if (sb.length() > 0)
+                sb.append(", ");
             sb.append(address.getCity());
         }
         if (address.getProvince() != null && !address.getProvince().isBlank()) {
-            if (sb.length() > 0) sb.append(", ");
+            if (sb.length() > 0)
+                sb.append(", ");
             sb.append(address.getProvince());
         }
         if (address.getPostalCode() != null && !address.getPostalCode().isBlank()) {
-            if (sb.length() > 0) sb.append(", ");
+            if (sb.length() > 0)
+                sb.append(", ");
             sb.append(address.getPostalCode());
         }
         if (address.getCountry() != null && !address.getCountry().isBlank()) {
-            if (sb.length() > 0) sb.append(", ");
+            if (sb.length() > 0)
+                sb.append(", ");
             sb.append(address.getCountry());
         }
 
