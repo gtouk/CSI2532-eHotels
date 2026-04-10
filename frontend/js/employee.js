@@ -462,13 +462,22 @@ async function initAdminHotelForm() {
   const id = getParam("id");
   const sel = form.chainId;
 
-  const chainsRes = await apiFetch("GET", "/chains");
+  sel.innerHTML = "";
 
-  if (chainsRes.success && chainsRes.data && chainsRes.data.length > 0) {
-    chainsRes.data.forEach(function (c) {
+  const chainsRes = await apiFetch("GET", "/chains");
+  console.log("CHAINS RESPONSE =", chainsRes);
+
+  const chains = Array.isArray(chainsRes)
+    ? chainsRes
+    : (chainsRes && Array.isArray(chainsRes.data) ? chainsRes.data : []);
+
+  console.log("CHAINS PARSED =", chains);
+
+  if (chains.length > 0) {
+    chains.forEach(function (c) {
       const o = document.createElement("option");
-      o.value = c.chainId;
-      o.textContent = c.name;
+      o.value = String(c.chainId);
+      o.textContent = (c.name || ("Chaîne #" + c.chainId)) + " (#" + c.chainId + ")";
       sel.appendChild(o);
     });
   } else {
@@ -480,13 +489,23 @@ async function initAdminHotelForm() {
 
   if (id) {
     const listRes = await apiFetch("GET", "/employee/admin/hotels");
-    const list = listRes.success ? listRes.data : [];
-    const h = list && list.find(function (x) { return String(x.hotelId) === String(id); });
+    const list = Array.isArray(listRes)
+      ? listRes
+      : (listRes && Array.isArray(listRes.data) ? listRes.data : []);
+
+    const h = list.find(function (x) {
+      return String(x.hotelId) === String(id);
+    });
 
     if (h) {
-      if (h.chainId && !Array.from(form.chainId.options).some(function (o) { return o.value === String(h.chainId); })) {
+      if (
+        h.chainId &&
+        !Array.from(form.chainId.options).some(function (o) {
+          return o.value === String(h.chainId);
+        })
+      ) {
         const o = document.createElement("option");
-        o.value = h.chainId;
+        o.value = String(h.chainId);
         o.textContent = "Chaîne #" + h.chainId;
         form.chainId.appendChild(o);
       }
@@ -532,7 +551,9 @@ async function initAdminHotelForm() {
 
     if (out.success) {
       showAlert("success", "Hôtel enregistré.");
-      setTimeout(function () { window.location.href = "hotels.html"; }, 900);
+      setTimeout(function () {
+        window.location.href = "hotels.html";
+      }, 900);
     } else {
       let msg = out.message || "Erreur.";
       if (out.errors && out.errors.length > 0) {
