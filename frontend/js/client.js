@@ -66,33 +66,63 @@ async function initHotelDetails() {
   const el = document.getElementById("hotel-content");
   showLoading("hotel-content");
 
-  const res = await apiFetch("GET", "/hotels/" + hotelId);
-  if (!res.success || !res.data) {
+  const hotelRaw = await apiFetch("GET", "/hotels/" + hotelId);
+  const h = hotelRaw && hotelRaw.data ? hotelRaw.data : hotelRaw;
+
+  if (!h || !h.hotelId) {
     el.innerHTML = emptyMsg("Hôtel introuvable.");
     return;
   }
 
-  const h = res.data;
+  const today = new Date();
+  const tomorrow = new Date();
+  tomorrow.setDate(today.getDate() + 1);
+
+  const fmt = d => d.toISOString().split("T")[0];
+  const startDate = fmt(today);
+  const endDate = fmt(tomorrow);
+
   el.innerHTML =
     `<div class="breadcrumb"><a href="hotels.html">Hôtels</a> / ${esc(h.name)}</div>` +
-    `<h1>${esc(h.name)} ${starsHTML(h.category)}</h1>` +
-    `<p style="color:#777;margin-bottom:24px">${esc(h.address || "")} — ${esc(h.city || "")}, ${esc(h.country || "")}</p>` +
-    `<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">` +
-      `<h2>Chambres</h2>` +
-      `<a href="room-search.html?hotelId=${h.hotelId}" class="btn btn-sm btn-outline">Rechercher</a>` +
+    `<h1>${esc(h.name)} ${starsHTML(h.category || 0)}</h1>` +
+    `<p style="color:#777;margin-bottom:8px">${esc(h.address || "")}</p>` +
+    `<p style="color:#777;margin-bottom:24px">${esc(h.city || "")}, ${esc(h.province || "")}, ${esc(h.country || "")}</p>` +
+    `<div class="card" style="margin-bottom:20px">` +
+      `<div class="detail-grid">` +
+        detailItem("Nom", esc(h.name || "—")) +
+        detailItem("Catégorie", starsHTML(h.category || 0)) +
+        detailItem("Ville", esc(h.city || "—")) +
+        detailItem("Province", esc(h.province || "—")) +
+        detailItem("Pays", esc(h.country || "—")) +
+        detailItem("Adresse", esc(h.address || "—")) +
+      `</div>` +
     `</div>` +
-    `<div id="hotel-rooms"><div class="loading"><div class="spinner"></div></div></div>`;
+    `<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">` +
+      `<h2>Chambres disponibles</h2>` +
+      `<a href="room-search.html?hotelId=${h.hotelId}" class="btn btn-sm btn-outline">Recherche avancée</a>` +
+    `</div>` +
+    `<p style="color:#777;margin-bottom:14px">Disponibilités affichées pour la période du <strong>${formatDate(startDate)}</strong> au <strong>${formatDate(endDate)}</strong>.</p>` +
+    `<div id="hotel-rooms"><div class="loading"><div class="spinner"></div><p>Chargement…</p></div></div>`;
 
-  // Load rooms for this hotel
-  const roomRes = await apiFetch("GET", "/rooms/search?hotelId=" + hotelId);
-  const rooms = Array.isArray(roomRes) ? roomRes : (roomRes.success ? roomRes.data : []);
+  const roomsRaw = await apiFetch(
+    "GET",
+    "/rooms/search?hotelId=" + encodeURIComponent(hotelId) +
+      "&startDate=" + encodeURIComponent(startDate) +
+      "&endDate=" + encodeURIComponent(endDate)
+  );
+
+  const rooms = Array.isArray(roomsRaw)
+    ? roomsRaw
+    : (roomsRaw && roomsRaw.data ? roomsRaw.data : []);
+
   const roomsEl = document.getElementById("hotel-rooms");
 
   if (!rooms || rooms.length === 0) {
-    roomsEl.innerHTML = emptyMsg("Aucune chambre trouvée pour cet hôtel.");
-  } else {
-    roomsEl.innerHTML = `<div class="card-grid">${rooms.map(roomCardHTML).join("")}</div>`;
+    roomsEl.innerHTML = emptyMsg("Aucune chambre disponible pour cet hôtel sur la période sélectionnée.");
+    return;
   }
+
+  roomsEl.innerHTML = `<div class="card-grid">${rooms.map(roomCardHTML).join("")}</div>`;
 }
 
 /* ====================================================================
@@ -103,25 +133,13 @@ async function initRoomSearch() {
   const form = document.getElementById("search-form");
   const resultsEl = document.getElementById("search-results");
 
-  // const chainSelect = document.getElementById("filter-chain");
-  // if (chainSelect) {
-  //   const chainsRes = await apiFetch("GET", "/chains");
-  //   if (chainsRes.success && chainsRes.data) {
-  //     for (const c of chainsRes.data) {
-  //       const opt = document.createElement("option");
-  //       opt.value = c.chainId;
-  //       opt.textContent = c.name;
-  //       chainSelect.appendChild(opt);
-  //     }
-  //   } else {
-  //     console.warn("Route /chains non disponible");
-  //   }
-  // }
-
   const hotelId = getParam("hotelId");
 
-  form.addEventListener("submit", async function (e) {
-    e.preventDefault();
+  function fmt(d) {
+    return d.toISOString().split("T")[0];
+  }
+
+  async function runSearch() {
     clearAlert();
 
     const startDate = form.startDate.value;
@@ -153,38 +171,51 @@ async function initRoomSearch() {
 
     for (const name of filterNames) {
       const input = form.elements[name];
-      if (input && input.value) params.set(name, input.value);
+      if (input && input.value) {
+        params.set(name, input.value);
+      }
     }
 
-    if (hotelId) params.set("hotelId", hotelId);
+    if (hotelId) {
+      params.set("hotelId", hotelId);
+    }
 
-    const query = params.toString();
-    const path = query ? "/rooms/search?" + query : "/rooms/search";
-
-    const res = await apiFetch("GET", path);
-    const rooms = Array.isArray(res) ? res : (res.success ? res.data : []);
+    const path = "/rooms/search?" + params.toString();
+    const raw = await apiFetch("GET", path);
+    const rooms = Array.isArray(raw) ? raw : (raw && raw.data ? raw.data : []);
 
     if (!rooms || rooms.length === 0) {
-      resultsEl.innerHTML = emptyMsg("Aucune chambre ne correspond à vos critères.");
+      resultsEl.innerHTML = emptyMsg("Aucune chambre disponible ne correspond à vos critères.");
+      return;
+    }
+
+    const availableRooms = rooms.filter(function (r) {
+      return r.status === "AVAILABLE";
+    });
+
+    if (availableRooms.length === 0) {
+      resultsEl.innerHTML = emptyMsg("Aucune chambre avec le statut AVAILABLE.");
       return;
     }
 
     resultsEl.innerHTML =
-      `<p style="color:#777;margin-bottom:12px">${rooms.length} chambre(s) trouvée(s)</p>` +
-      `<div class="card-grid">${rooms.map(roomCardHTML).join("")}</div>`;
+      `<p style="color:#777;margin-bottom:12px">${availableRooms.length} chambre(s) disponible(s)</p>` +
+      `<div class="card-grid">${availableRooms.map(roomCardHTML).join("")}</div>`;
+  }
+
+  form.addEventListener("submit", async function (e) {
+    e.preventDefault();
+    await runSearch();
   });
 
-  if (hotelId) {
-    const today = new Date();
-    const tomorrow = new Date();
-    tomorrow.setDate(today.getDate() + 1);
+  const today = new Date();
+  const tomorrow = new Date();
+  tomorrow.setDate(today.getDate() + 1);
 
-    const fmt = d => d.toISOString().split("T")[0];
-    if (!form.startDate.value) form.startDate.value = fmt(today);
-    if (!form.endDate.value) form.endDate.value = fmt(tomorrow);
+  if (!form.startDate.value) form.startDate.value = fmt(today);
+  if (!form.endDate.value) form.endDate.value = fmt(tomorrow);
 
-    form.requestSubmit();
-  }
+  await runSearch();
 }
 
 /* ====================================================================
@@ -230,7 +261,14 @@ async function initRoomDetails() {
    ==================================================================== */
 
 function initLogin() {
-  if (isLoggedIn()) { window.location.href = "client/dashboard.html"; return; }
+  if (isEmployeeLoggedIn()) {
+  clearEmployeeSession();
+  }
+
+  if (isLoggedIn()) {
+    window.location.href = "client/dashboard.html";
+    return;
+  }
 
   const form = document.getElementById("login-form");
   form.addEventListener("submit", async function (e) {
@@ -252,7 +290,7 @@ function initLogin() {
     const res = await apiFetch("POST", "/client/login", { email, password });
 
     if (res.success) {
-      saveClient(res.data);
+      loginClientExclusive(res.data);
       window.location.href = "client/dashboard.html";
     } else {
       showAlert("danger", res.message || "Identifiants invalides.");
@@ -501,19 +539,34 @@ async function initReservations() {
 async function initReservationDetails() {
   if (!requireAuth()) return;
 
+  const client = getClient();
+  const clientId = client?.clientId;
   const id = getParam("id");
-  if (!id) return;
-
   const el = document.getElementById("reservation-content");
+
+  if (!id || !el) return;
+
+  if (!clientId) {
+    el.innerHTML = '<div class="alert alert-danger">Session client invalide. Reconnectez-vous.</div>';
+    return;
+  }
+
   showLoading("reservation-content");
 
-  const res = await apiFetch("GET", "/client/reservations/" + id);
-  if (!res.success || !res.data) {
+  const raw = await apiFetch(
+    "GET",
+    "/client/reservations/" + encodeURIComponent(id) + "?clientId=" + encodeURIComponent(clientId)
+  );
+
+  console.log("RESERVATION DETAILS RESPONSE =", raw);
+
+  const r = raw && raw.data ? raw.data : raw;
+
+  if (!r || !r.reservationId) {
     el.innerHTML = emptyMsg("Réservation introuvable.");
     return;
   }
 
-  const r = res.data;
   const nights = nightCount(r.startDate, r.endDate);
   const canCancel = r.status === "RESERVED";
 
@@ -535,27 +588,44 @@ async function initReservationDetails() {
         : "") +
     `</div>`;
 
-  if (canCancel) {
-    document.getElementById("cancel-btn").addEventListener("click", async function () {
-      if (!confirm("Voulez-vous vraiment annuler cette réservation ?")) return;
+if (canCancel) {
+  document.getElementById("cancel-btn").addEventListener("click", async function () {
+    if (!confirm("Voulez-vous vraiment annuler cette réservation ?")) return;
 
-      const btn = document.getElementById("cancel-btn");
-      btn.disabled = true;
-      btn.textContent = "Annulation…";
+    const btn = document.getElementById("cancel-btn");
+    btn.disabled = true;
+    btn.textContent = "Annulation…";
 
-      const cancelRes = await apiFetch("POST", "/client/reservations/" + id + "/cancel");
+    const client = getClient();
+    const clientId = client?.clientId;
 
-      if (cancelRes.success) {
-        showAlert("success", "Réservation annulée.");
-        btn.remove();
-        setTimeout(function () { location.reload(); }, 1200);
-      } else {
-        showAlert("danger", cancelRes.message || "Impossible d'annuler.");
-        btn.disabled = false;
-        btn.textContent = "Annuler cette réservation";
+    if (!clientId) {
+      showAlert("danger", "Session client invalide. Reconnectez-vous.");
+      btn.disabled = false;
+      btn.textContent = "Annuler cette réservation";
+      return;
+    }
+
+    const cancelRes = await apiFetch(
+      "POST",
+      "/client/reservations/" + encodeURIComponent(id) + "/cancel?clientId=" + encodeURIComponent(clientId)
+    );
+
+    if (cancelRes.success || (cancelRes && cancelRes.reservationId)) {
+      showAlert("success", "Réservation annulée.");
+      btn.remove();
+      setTimeout(function () { location.reload(); }, 1200);
+    } else {
+      let msg = cancelRes.message || "Impossible d'annuler.";
+      if (cancelRes.errors && cancelRes.errors.length > 0) {
+        msg += " " + cancelRes.errors.map(function (e) { return e.error; }).join(", ");
       }
-    });
-  }
+      showAlert("danger", msg);
+      btn.disabled = false;
+      btn.textContent = "Annuler cette réservation";
+    }
+  });
+}
 }
 
 /* ====================================================================
