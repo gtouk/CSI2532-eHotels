@@ -85,6 +85,7 @@ CREATE TABLE hotel_phone (
 CREATE TABLE room (
     room_id SERIAL PRIMARY KEY,
     hotel_id INTEGER NOT NULL,
+    room_number VARCHAR(20) NOT NULL,
     price DECIMAL(10,2) NOT NULL CHECK (price > 0),
     capacity VARCHAR(50) NOT NULL,
     view_type VARCHAR(50),
@@ -132,6 +133,10 @@ CREATE TABLE employee (
     ssn VARCHAR(20) NOT NULL UNIQUE,
     role VARCHAR(100) NOT NULL,
     address_id INTEGER NOT NULL,
+    email VARCHAR(255) UNIQUE,
+    phone VARCHAR(30),
+    password VARCHAR(255),
+    active BOOLEAN NOT NULL DEFAULT TRUE,
     CONSTRAINT fk_employee_hotel
         FOREIGN KEY (hotel_id) REFERENCES hotel(hotel_id),
     CONSTRAINT fk_employee_address
@@ -144,6 +149,9 @@ CREATE TABLE reservation (
     customer_id INTEGER NOT NULL,
     start_date DATE NOT NULL,
     end_date DATE NOT NULL,
+    status VARCHAR(30) NOT NULL DEFAULT 'RESERVED',
+    created_at TIMESTAMP DEFAULT NOW(),
+    total_price DECIMAL(10,2) NOT NULL DEFAULT 0.00,
     CONSTRAINT fk_reservation_room
         FOREIGN KEY (room_id) REFERENCES room(room_id),
     CONSTRAINT fk_reservation_customer
@@ -160,6 +168,7 @@ CREATE TABLE rental (
     room_id INTEGER NOT NULL,
     start_date DATE NOT NULL,
     end_date DATE NOT NULL,
+    status VARCHAR(30) NOT NULL DEFAULT 'ACTIVE',
     CONSTRAINT fk_rental_customer
         FOREIGN KEY (customer_id) REFERENCES customer(customer_id),
     CONSTRAINT fk_rental_employee
